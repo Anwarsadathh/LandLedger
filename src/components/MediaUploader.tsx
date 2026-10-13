@@ -17,6 +17,7 @@ export function MediaUploader({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadingCount, setUploadingCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   async function uploadOne(file: File): Promise<MediaItem> {
@@ -54,12 +55,15 @@ export function MediaUploader({
 
   async function onFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
+    const list = Array.from(files);
     setBusy(true);
     setError(null);
+    setUploadingCount(list.length);
     const added: MediaItem[] = [];
     try {
-      for (const file of Array.from(files)) {
+      for (const file of list) {
         added.push(await uploadOne(file));
+        setUploadingCount((n) => Math.max(0, n - 1));
       }
       onChange([...value, ...added]);
     } catch (e) {
@@ -67,6 +71,7 @@ export function MediaUploader({
       if (added.length) onChange([...value, ...added]); // keep whatever succeeded
     } finally {
       setBusy(false);
+      setUploadingCount(0);
       if (inputRef.current) inputRef.current.value = "";
     }
   }
@@ -77,7 +82,7 @@ export function MediaUploader({
 
   return (
     <div className="flex flex-col gap-3">
-      {value.length > 0 && (
+      {(value.length > 0 || uploadingCount > 0) && (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {value.map((m, i) => (
             <div key={m.url} className="group relative overflow-hidden rounded-lg border border-[var(--border)]">
@@ -101,6 +106,15 @@ export function MediaUploader({
               )}
             </div>
           ))}
+          {Array.from({ length: uploadingCount }).map((_, i) => (
+            <div
+              key={`uploading-${i}`}
+              className="flex aspect-square w-full animate-pulse flex-col items-center justify-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--background)]"
+            >
+              <Spinner />
+              <span className="text-[10px] text-[var(--muted)]">Uploading</span>
+            </div>
+          ))}
         </div>
       )}
 
@@ -111,7 +125,16 @@ export function MediaUploader({
           disabled={busy}
           className="btn-ghost"
         >
-          {busy ? "Uploading…" : value.length ? "+ Add more" : "Upload photos / video"}
+          {busy ? (
+            <>
+              <Spinner />
+              {uploadingCount > 0 ? `Uploading ${uploadingCount} left…` : "Uploading…"}
+            </>
+          ) : value.length ? (
+            "+ Add more"
+          ) : (
+            "Upload photos / video"
+          )}
         </button>
         <input
           ref={inputRef}
@@ -125,5 +148,14 @@ export function MediaUploader({
 
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[var(--muted)] border-t-transparent"
+    />
   );
 }

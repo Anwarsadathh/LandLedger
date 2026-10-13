@@ -26,22 +26,41 @@ export function LocationPicker({
   latitude,
   longitude,
   onChange,
+  onAddress,
 }: {
   latitude: string;
   longitude: string;
   onChange: (lat: string, lng: string) => void;
+  onAddress?: (addr: { state?: string | null; city?: string | null; locality?: string | null }) => void;
 }) {
   const [link, setLink] = useState("");
   const [status, setStatus] = useState<"idle" | "busy" | "error">("idle");
   const [msg, setMsg] = useState<string | null>(null);
   const [manual, setManual] = useState(false);
+  const [resolvingAddr, setResolvingAddr] = useState(false);
 
   const hasCoords = latitude !== "" && longitude !== "";
+
+  // Reverse-geocode the pin to auto-fill state / city / locality.
+  async function resolveAddress(lat: number, lng: number) {
+    if (!onAddress) return;
+    setResolvingAddr(true);
+    try {
+      const res = await fetch(`/api/v1/geo/reverse?lat=${lat}&lng=${lng}`);
+      const json = await res.json();
+      if (res.ok && json.data) onAddress(json.data);
+    } catch {
+      // Non-fatal — coordinates are still set; user can pick state/city manually.
+    } finally {
+      setResolvingAddr(false);
+    }
+  }
 
   function apply(lat: number, lng: number) {
     onChange(lat.toFixed(6), lng.toFixed(6));
     setStatus("idle");
     setMsg(null);
+    void resolveAddress(lat, lng);
   }
 
   async function handleLink(value: string) {
@@ -113,32 +132,42 @@ export function LocationPicker({
       </div>
 
       {status === "busy" && <p className="text-xs text-[var(--muted)]">Finding location…</p>}
+      {resolvingAddr && <p className="text-xs text-[var(--muted)]">Filling state &amp; city from the pin…</p>}
       {status === "error" && msg && <p className="text-xs text-red-500">{msg}</p>}
 
       {hasCoords && status !== "error" && (
-        <p className="text-xs text-green-600">
-          📍 Set: {latitude}, {longitude}{" "}
-          <a
-            href={`https://www.google.com/maps?q=${latitude},${longitude}`}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
-            preview
-          </a>{" "}
-          ·{" "}
-          <button
-            type="button"
-            onClick={() => {
-              onChange("", "");
-              setLink("");
-              setStatus("idle");
-            }}
-            className="underline"
-          >
-            clear
-          </button>
-        </p>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-green-600">
+            📍 Set: {latitude}, {longitude} ·{" "}
+            <a
+              href={`https://www.google.com/maps?q=${latitude},${longitude}`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              open in Maps ↗
+            </a>{" "}
+            ·{" "}
+            <button
+              type="button"
+              onClick={() => {
+                onChange("", "");
+                setLink("");
+                setStatus("idle");
+              }}
+              className="underline"
+            >
+              clear
+            </button>
+          </p>
+          <iframe
+            title="Location preview"
+            src={`https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`}
+            className="h-48 w-full rounded-lg border border-[var(--border)]"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       )}
 
       <button

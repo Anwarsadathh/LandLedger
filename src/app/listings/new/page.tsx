@@ -332,12 +332,18 @@ export default function NewListingWizard() {
         </div>
 
         {step > 0 ? (
-          <button onClick={goBack} className="mb-3 text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
-            ← Back
+          <button
+            onClick={goBack}
+            className="mb-3 inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+          >
+            <BackArrow /> Back
           </button>
         ) : (
-          <Link href="/dashboard" className="mb-3 inline-block text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
-            ← Cancel
+          <Link
+            href="/dashboard"
+            className="mb-3 inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+          >
+            <BackArrow /> Cancel
           </Link>
         )}
 
@@ -422,6 +428,20 @@ function StepLocation({ form, set, errors }: StepProps) {
     <div>
       <Heading title="Where is your property located?" sub="An accurate location helps you connect with the right buyers." />
       <div className="flex max-w-xl flex-col gap-4">
+        <Field label="Pin location" error={errors.latitude || errors.longitude}>
+          <LocationPicker
+            latitude={form.latitude}
+            longitude={form.longitude}
+            onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
+            onAddress={(a) =>
+              set({
+                ...(a.state ? { state: a.state } : {}),
+                ...(a.city ? { district: a.city } : {}),
+                ...(a.locality ? { locality: a.locality } : {}),
+              })
+            }
+          />
+        </Field>
         <Field label="State" error={errors.state}>
           <Combobox
             value={form.state}
@@ -447,13 +467,6 @@ function StepLocation({ form, set, errors }: StepProps) {
         </Field>
         <Field label="Address / landmark (optional)">
           <input value={form.addressText} onChange={(e) => set({ addressText: e.target.value })} className="input w-full" />
-        </Field>
-        <Field label="Pin location" error={errors.latitude || errors.longitude}>
-          <LocationPicker
-            latitude={form.latitude}
-            longitude={form.longitude}
-            onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
-          />
         </Field>
       </div>
     </div>
@@ -600,6 +613,23 @@ function Heading({ title, sub }: { title: string; sub: string }) {
       <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-1 text-sm text-[var(--muted)]">{sub}</p>
     </div>
+  );
+}
+
+function BackArrow() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
   );
 }
 

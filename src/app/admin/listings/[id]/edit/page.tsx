@@ -205,6 +205,20 @@ export default function EditListingPage() {
         </Section>
 
         <Section title="Location">
+          <Field label="Pin location">
+            <LocationPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
+              onAddress={(a) =>
+                set({
+                  ...(a.state ? { state: a.state } : {}),
+                  ...(a.city ? { district: a.city } : {}),
+                  ...(a.locality ? { locality: a.locality } : {}),
+                })
+              }
+            />
+          </Field>
           <Row>
             <Field label="State" className="flex-1">
               <Combobox value={form.state} options={STATE_NAMES} placeholder="Search state…" onChange={(v) => set({ state: v, district: "" })} />
@@ -218,13 +232,6 @@ export default function EditListingPage() {
             <Field label="Locality / Village" className="flex-1"><input value={form.locality} onChange={(e) => set({ locality: e.target.value })} className="input w-full" /></Field>
           </Row>
           <Field label="Address / landmark"><input value={form.addressText} onChange={(e) => set({ addressText: e.target.value })} className="input w-full" /></Field>
-          <Field label="Pin location">
-            <LocationPicker
-              latitude={form.latitude}
-              longitude={form.longitude}
-              onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
-            />
-          </Field>
         </Section>
 
         <Section title="Attributes">
