@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Combobox } from "@/components/Combobox";
+import { LocationPicker } from "@/components/LocationPicker";
 import { MediaUploader, type MediaItem } from "@/components/MediaUploader";
 import { STATE_NAMES, citiesForState } from "@/lib/states-data";
 import { AREA_UNIT_OPTIONS, FACING_OPTIONS } from "@/lib/listing-options";
@@ -217,10 +218,13 @@ export default function EditListingPage() {
             <Field label="Locality / Village" className="flex-1"><input value={form.locality} onChange={(e) => set({ locality: e.target.value })} className="input w-full" /></Field>
           </Row>
           <Field label="Address / landmark"><input value={form.addressText} onChange={(e) => set({ addressText: e.target.value })} className="input w-full" /></Field>
-          <Row>
-            <Field label="Latitude"><input value={form.latitude} onChange={(e) => set({ latitude: e.target.value })} className="input" inputMode="decimal" /></Field>
-            <Field label="Longitude"><input value={form.longitude} onChange={(e) => set({ longitude: e.target.value })} className="input" inputMode="decimal" /></Field>
-          </Row>
+          <Field label="Pin location">
+            <LocationPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
+            />
+          </Field>
         </Section>
 
         <Section title="Attributes">

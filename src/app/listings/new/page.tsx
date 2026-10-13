@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CONSENT_NOTICE_VERSION } from "@/lib/consent";
 import { Combobox } from "@/components/Combobox";
+import { LocationPicker } from "@/components/LocationPicker";
 import { STATE_NAMES, citiesForState } from "@/lib/states-data";
 import { MediaUploader, type MediaItem } from "@/components/MediaUploader";
 import {
@@ -447,15 +448,13 @@ function StepLocation({ form, set, errors }: StepProps) {
         <Field label="Address / landmark (optional)">
           <input value={form.addressText} onChange={(e) => set({ addressText: e.target.value })} className="input w-full" />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Latitude" error={errors.latitude}>
-            <input value={form.latitude} onChange={(e) => set({ latitude: e.target.value })} className="input w-full" placeholder="25.60" inputMode="decimal" />
-          </Field>
-          <Field label="Longitude" error={errors.longitude}>
-            <input value={form.longitude} onChange={(e) => set({ longitude: e.target.value })} className="input w-full" placeholder="85.10" inputMode="decimal" />
-          </Field>
-        </div>
-        <p className="text-xs text-[var(--muted)]">A map pin picker (MapLibre) is coming — for now, enter the coordinates.</p>
+        <Field label="Pin location" error={errors.latitude || errors.longitude}>
+          <LocationPicker
+            latitude={form.latitude}
+            longitude={form.longitude}
+            onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
+          />
+        </Field>
       </div>
     </div>
   );
