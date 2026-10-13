@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function SignOutButton() {
+export function SignOutButton({ className = "btn-ghost" }: { className?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -15,12 +15,8 @@ export function SignOutButton() {
   }
 
   return (
-    <button
-      onClick={signOut}
-      disabled={busy}
-      className="text-[var(--muted)] hover:text-[var(--foreground)]"
-    >
-      {busy ? "…" : "Sign out"}
+    <button onClick={signOut} disabled={busy} className={className}>
+      {busy ? "Signing out…" : "Sign out"}
     </button>
   );
 }
