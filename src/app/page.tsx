@@ -95,87 +95,49 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   return (
     <div className="flex flex-col gap-20 pb-6">
       {/* HERO */}
-      <section className="full-bleed relative -mt-8 overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white">
-        {/* dot-grid vector pattern */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.15]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "26px 26px",
-          }}
-        />
-        {/* animated glow blobs */}
-        <div className="animate-float-slow pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/15 blur-3xl" />
-        <div
-          className="animate-float-slow pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-violet-300/25 blur-3xl"
-          style={{ animationDelay: "-6s" }}
-        />
-        <div
-          className="animate-float-slow pointer-events-none absolute right-1/3 top-10 h-64 w-64 rounded-full bg-cyan-300/20 blur-3xl"
-          style={{ animationDelay: "-11s" }}
-        />
+      <section className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-5 py-12 sm:px-10 sm:py-16">
+        <div className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full bg-blue-300/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-indigo-300/20 blur-3xl" />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:py-28">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-300" />
-              Land &amp; property across India
+        <div className="relative mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-3 py-1 text-xs font-medium text-blue-700 backdrop-blur">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+            Land &amp; property across India
+          </span>
+
+          <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-[var(--foreground)] sm:text-6xl">
+            Find land &amp; property{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              you can trust
             </span>
+            .
+          </h1>
 
-            <h1
-              className="animate-fade-up mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight drop-shadow-sm sm:text-6xl"
-              style={{ animationDelay: "0.08s" }}
-            >
-              Find land &amp; property{" "}
-              <span className="text-shimmer bg-gradient-to-r from-cyan-200 via-white to-cyan-200 bg-clip-text text-transparent">
-                you can trust
-              </span>
-              .
-            </h1>
+          <p className="mx-auto mt-5 max-w-xl text-base text-[var(--muted)] sm:text-lg">
+            A transparent marketplace for plots, homes and farmland. Every listing shows exactly what
+            was checked — no misleading “Verified” badges.
+          </p>
 
-            <p
-              className="animate-fade-up mx-auto mt-5 max-w-xl text-base text-blue-100 sm:text-lg"
-              style={{ animationDelay: "0.16s" }}
-            >
-              A transparent marketplace for plots, homes and farmland. Every listing shows exactly what
-              was checked — no misleading “Verified” badges.
-            </p>
-
-            <div
-              className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3"
-              style={{ animationDelay: "0.24s" }}
-            >
-              <Link
-                href="/listings/new"
-                className="inline-flex items-center justify-center rounded-md bg-white px-6 py-3 text-base font-semibold text-blue-700 shadow-lg shadow-blue-950/20 transition hover:-translate-y-0.5 hover:bg-blue-50"
-              >
-                List your property
-              </Link>
-              <a
-                href="#listings"
-                className="inline-flex items-center justify-center rounded-md border border-white/40 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10"
-              >
-                Browse listings
-              </a>
-            </div>
-
-            <div
-              className="animate-fade-up mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-blue-100"
-              style={{ animationDelay: "0.32s" }}
-            >
-              <HeroChip>Free to list</HeroChip>
-              <HeroChip>Human-reviewed</HeroChip>
-              <HeroChip>Local units — bigha, katha, acre</HeroChip>
-            </div>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/listings/new" className="btn-primary px-6 py-2.5 text-base">
+              List your property
+            </Link>
+            <a href="#listings" className="btn-ghost px-6 py-2.5 text-base">
+              Browse listings
+            </a>
           </div>
 
-          {/* Search card */}
-          <div className="animate-fade-up relative mx-auto mt-10 max-w-4xl" style={{ animationDelay: "0.4s" }}>
-            <p className="mb-2 px-1 text-sm font-medium text-white/90">Search listings</p>
-            <div className="rounded-xl shadow-2xl shadow-blue-950/30">
-              <MarketplaceFilters initial={{}} />
-            </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[var(--muted)]">
+            <TrustChip>Free to list</TrustChip>
+            <TrustChip>Human-reviewed</TrustChip>
+            <TrustChip>Local units — bigha, katha, acre</TrustChip>
           </div>
+        </div>
+
+        {/* Search card */}
+        <div className="relative mx-auto mt-9 max-w-4xl">
+          <p className="mb-2 px-1 text-sm font-medium text-[var(--foreground)]">Search listings</p>
+          <MarketplaceFilters initial={{}} />
         </div>
       </section>
 
@@ -322,10 +284,10 @@ function SectionHeader({ title, sub, action }: { title: string; sub?: string; ac
   );
 }
 
-function HeroChip({ children }: { children: React.ReactNode }) {
+function TrustChip({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-cyan-300" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-blue-600" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 6L9 17l-5-5" />
       </svg>
       {children}

@@ -28,62 +28,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  overflow-x: hidden; /* full-bleed sections use 100vw */
-}
-
-/* ---- full-bleed + landing animations ---- */
-.full-bleed {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes float-slow {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(24px, -28px) scale(1.12);
-  }
-}
-@keyframes gradient-pan {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-.animate-fade-up {
-  animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-.animate-float-slow {
-  animation: float-slow 16s ease-in-out infinite;
-}
-.text-shimmer {
-  background-size: 200% auto;
-  animation: gradient-pan 5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
-  .animate-float-slow,
-  .text-shimmer {
-    animation: none !important;
-  }
 }
 
 @layer components {
