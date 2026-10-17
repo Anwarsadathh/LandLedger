@@ -11,6 +11,15 @@ const UserSchema = new Schema(
     email: { type: String, unique: true, sparse: true },
     // Not selected by default so it never leaks; login explicitly .select()s it.
     passwordHash: { type: String, select: false },
+    // OAuth (Google) identity. googleId is the provider's stable subject id.
+    googleId: { type: String, unique: true, sparse: true },
+    authProvider: { type: String, enum: ["password", "google"], default: "password" },
+    emailVerified: { type: Boolean, default: false },
+    // Profile data collected from the identity provider.
+    avatarUrl: { type: String },
+    givenName: { type: String },
+    familyName: { type: String },
+    locale: { type: String },
     role: { type: String, enum: ROLES, default: "OWNER", index: true },
     status: { type: String, enum: ["ACTIVE", "SUSPENDED"], default: "ACTIVE" },
     lastLoginAt: Date,

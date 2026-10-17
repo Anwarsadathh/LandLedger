@@ -52,10 +52,13 @@ export function SiteNav({ user }: { user: NavUser }) {
 
         {user ? (
           <div className="flex items-center gap-2.5">
-            <span className="flex items-center gap-2">
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-[var(--accent-soft)]"
+            >
               <Avatar name={user.name} />
               <span className="text-sm font-medium">{user.name.split(" ")[0]}</span>
-            </span>
+            </Link>
             <SignOutButton className="btn-ghost px-3 py-1.5" />
           </div>
         ) : (
@@ -96,13 +99,17 @@ export function SiteNav({ user }: { user: NavUser }) {
           <div className="absolute inset-x-0 top-full z-40 border-b border-[var(--border)] bg-[var(--card)] shadow-xl md:hidden">
             <div className="mx-auto max-w-6xl px-4 py-3">
               {user && (
-                <div className="mb-2 flex items-center gap-3 rounded-xl bg-[var(--background)] p-3">
+                <Link
+                  href="/profile"
+                  onClick={close}
+                  className="mb-2 flex items-center gap-3 rounded-xl bg-[var(--background)] p-3"
+                >
                   <Avatar name={user.name} big />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">{user.name}</p>
-                    <p className="text-xs text-[var(--muted)]">{user.isModerator ? "Admin" : "Member"}</p>
+                    <p className="text-xs text-[var(--muted)]">View profile · {user.isModerator ? "Admin" : "Member"}</p>
                   </div>
-                </div>
+                </Link>
               )}
 
               <nav className="flex flex-col gap-0.5">

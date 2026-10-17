@@ -10,6 +10,18 @@ const ADMINISH: Role[] = ["ADMIN", "SUPER_ADMIN", "LISTING_REVIEWER"];
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
 
+const OAUTH_ERRORS: Record<string, string> = {
+  google_denied: "Google sign-in was cancelled.",
+  google_unconfigured:
+    "Google sign-in isn’t set up on the server (missing keys). Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local and restart the dev server.",
+  google_state: "Security check failed — please try signing in again.",
+  google_token:
+    "Couldn’t finish Google sign-in (token step). Check the client secret and that the redirect URI is registered in Google Console.",
+  google_profile: "Couldn’t read your Google profile. Please try again.",
+  google_email: "Your Google account didn’t return a verified email.",
+  google_error: "Something went wrong with Google sign-in. Please try again.",
+};
+
 export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -21,13 +33,18 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const isSignup = mode === "signup";
   const nextQs = next ? `?next=${encodeURIComponent(next)}` : "";
 
+  const oauthError = params.get("error");
+  const oauthErrorMsg = oauthError
+    ? (OAUTH_ERRORS[oauthError] ?? `Couldn’t sign in with Google (${oauthError}).`)
+    : null;
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     setError(null);
     const f = new FormData(e.currentTarget);
     const body = isSignup
-      ? { name: f.get("name"), email: f.get("email"), password: f.get("password") }
+      ? { name: f.get("name"), email: f.get("email"), phone: f.get("phone"), password: f.get("password") }
       : { email: f.get("email"), password: f.get("password") };
 
     try {
@@ -116,6 +133,24 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
               Email
               <input name="email" type="email" required className="input" placeholder="you@example.com" />
             </label>
+            {isSignup && (
+              <label className="flex flex-col gap-1 text-xs font-medium text-[var(--muted)]">
+                Mobile number
+                <div className="flex items-center gap-2">
+                  <span className="input flex shrink-0 items-center px-3 text-[var(--muted)]">+91</span>
+                  <input
+                    name="phone"
+                    type="tel"
+                    required
+                    inputMode="numeric"
+                    pattern="[6-9][0-9]{9}"
+                    maxLength={10}
+                    className="input flex-1"
+                    placeholder="10-digit mobile number"
+                  />
+                </div>
+              </label>
+            )}
             <label className="flex flex-col gap-1 text-xs font-medium text-[var(--muted)]">
               Password
               <input
@@ -140,8 +175,13 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           </div>
 
           {/* social */}
+          {oauthErrorMsg && (
+            <p className="mb-2.5 rounded-xl border border-red-600/30 bg-red-600/10 p-2.5 text-center text-xs text-red-700">
+              {oauthErrorMsg}
+            </p>
+          )}
           <div className="flex flex-col gap-2.5">
-            <SocialButton label="Continue with Google" icon={<GoogleIcon />} onClick={() => setSocialNote(true)} />
+            <SocialButton label="Continue with Google" icon={<GoogleIcon />} href={`/api/v1/auth/google${nextQs}`} />
             <SocialButton label="Continue with Apple" icon={<AppleIcon />} onClick={() => setSocialNote(true)} />
             <SocialButton label="Continue with Facebook" icon={<FacebookIcon />} onClick={() => setSocialNote(true)} />
           </div>
@@ -170,13 +210,29 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   );
 }
 
-function SocialButton({ label, icon, onClick }: { label: string; icon: React.ReactNode; onClick: () => void }) {
+function SocialButton({
+  label,
+  icon,
+  onClick,
+  href,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  onClick?: () => void;
+  href?: string;
+}) {
+  const cls =
+    "flex items-center justify-center gap-2.5 rounded-full border border-[var(--border)] bg-[var(--card)] py-3 text-sm font-medium text-[var(--foreground)] transition hover:border-[var(--foreground)]";
+  if (href) {
+    return (
+      <a href={href} className={cls}>
+        {icon}
+        {label}
+      </a>
+    );
+  }
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex items-center justify-center gap-2.5 rounded-full border border-[var(--border)] bg-[var(--card)] py-3 text-sm font-medium text-[var(--foreground)] transition hover:border-[var(--foreground)]"
-    >
+    <button type="button" onClick={onClick} className={cls}>
       {icon}
       {label}
     </button>
