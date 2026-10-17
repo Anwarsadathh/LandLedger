@@ -1,22 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EnquiryForm } from "@/components/EnquiryForm";
+import { ListingGallery } from "@/components/ListingGallery";
 import { getPublicListingBySlug } from "@/server/modules/listings/service";
 import { ApiError } from "@/lib/http";
-import {
-  LISTING_TYPE_LABELS,
-  formatArea,
-  formatPrice,
-  stateLabel,
-} from "@/lib/format";
+import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default async function ListingDetail({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ListingDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   let listing;
@@ -28,80 +20,144 @@ export default async function ListingDetail({
   }
 
   const loc = listing.location;
+  const subtypeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
+  const transactionLabel = listing.transactionType === "SALE" ? "For sale" : "For lease";
+  const locationLabel = [loc.locality, loc.subDistrict, loc.district, stateLabel(loc.state)]
+    .filter(Boolean)
+    .join(", ");
+  const publishedLabel = listing.publishedAt
+    ? new Date(listing.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+    : null;
+  const mapSrc = `https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&z=15&output=embed`;
+
+  const highlights = [
+    { label: "Price", value: formatPrice(listing.price) },
+    { label: "Area", value: formatArea(listing.area) },
+    listing.area.normalizedSqFt ? { label: "Built-up", value: `${listing.area.normalizedSqFt.toLocaleString("en-IN")} sq ft` } : null,
+    { label: "Transaction", value: transactionLabel },
+    listing.features?.facing && listing.features.facing !== "UNKNOWN"
+      ? { label: "Facing", value: listing.features.facing.replace(/_/g, " ").toLowerCase() }
+      : null,
+    listing.features?.roadAccess ? { label: "Road access", value: String(listing.features.roadAccess).toLowerCase() } : null,
+    { label: "Pin precision", value: loc.pinPrecision.replace(/_/g, " ").toLowerCase() },
+  ].filter(Boolean) as { label: string; value: string }[];
+
   return (
-    <div className="flex flex-col gap-6">
-      <Link href="/" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
-        ← Back to marketplace
+    <div className="flex flex-col gap-6 pb-24 lg:pb-6">
+      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-[var(--muted)] transition hover:text-[var(--foreground)]">
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+        Back to marketplace
       </Link>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 flex flex-col gap-5">
-          <div>
-            <span className="badge">{listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType}</span>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight">{listing.title}</h1>
-            <p className="mt-1 text-[var(--muted)]">
-              {loc.locality ? `${loc.locality}, ` : ""}
-              {loc.subDistrict ? `${loc.subDistrict}, ` : ""}
-              {loc.district}, {stateLabel(loc.state)}
+        {/* ---------- left ---------- */}
+        <div className="flex flex-col gap-7 lg:col-span-2">
+          <ListingGallery
+            media={listing.media}
+            title={listing.title}
+            subtypeLabel={subtypeLabel}
+            transactionLabel={transactionLabel}
+            priceLabel={formatPrice(listing.price)}
+            locationLabel={locationLabel}
+          />
+
+          {/* highlights */}
+          <section>
+            <h2 className="mb-3 text-lg font-bold tracking-tight">Highlights</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {highlights.map((h) => (
+                <div key={h.label} className="card p-4">
+                  <p className="text-xs text-[var(--muted)]">{h.label}</p>
+                  <p className="mt-0.5 font-semibold capitalize">{h.value}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* description */}
+          {listing.description && (
+            <section>
+              <h2 className="mb-2 text-lg font-bold tracking-tight">Description</h2>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]/90">{listing.description}</p>
+            </section>
+          )}
+
+          {/* map */}
+          <section>
+            <h2 className="mb-3 text-lg font-bold tracking-tight">Location</h2>
+            <div className="overflow-hidden rounded-2xl border border-[var(--border)]">
+              <iframe
+                title="Map"
+                src={mapSrc}
+                className="h-64 w-full"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Pin precision: {loc.pinPrecision.replace(/_/g, " ").toLowerCase()} · {loc.latitude.toFixed(5)}, {loc.longitude.toFixed(5)}
+            </p>
+          </section>
+
+          {/* honesty note */}
+          <div className="flex gap-3 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] p-4 text-sm">
+            <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-[var(--accent)]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8h.01M11 12h1v4h1" />
+            </svg>
+            <p className="text-[var(--foreground)]/90">
+              <strong>What was checked:</strong> listing details only. This is <em>not</em> a title
+              guarantee or a legal/document review — always verify documents independently before you buy.
+            </p>
+          </div>
+        </div>
+
+        {/* ---------- right (sticky) ---------- */}
+        <div className="flex flex-col gap-5 lg:sticky lg:top-6 lg:self-start">
+          {/* honest review card */}
+          <div className="card p-5">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--foreground)] text-white">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3Z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </span>
+              <div>
+                <p className="flex items-center gap-1.5 font-semibold">
+                  Human-reviewed
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--accent)]" fill="currentColor"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z" opacity="0" /><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" /></svg>
+                </p>
+                <p className="text-xs text-[var(--muted)]">
+                  {publishedLabel ? `Published on ${publishedLabel}` : "Reviewed by OROVA before publishing"}
+                </p>
+              </div>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-[var(--muted)]">
+              OROVA moderates every listing for quality before it goes live. We never show a fake
+              “Verified” badge — only what was actually checked.
             </p>
           </div>
 
-          {listing.media.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
-              {listing.media.map((m, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={m.url}
-                  alt={`${listing.title} ${i + 1}`}
-                  className="aspect-video w-full rounded-lg object-cover"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border)] text-sm text-[var(--muted)]">
-              No photos provided
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <Stat label="Price" value={formatPrice(listing.price)} />
-            <Stat label="Area" value={formatArea(listing.area)} />
-            <Stat label="Pin precision" value={loc.pinPrecision.replace(/_/g, " ").toLowerCase()} />
-            {listing.features?.facing && listing.features.facing !== "UNKNOWN" && (
-              <Stat label="Facing" value={listing.features.facing.replace(/_/g, " ").toLowerCase()} />
-            )}
-            {listing.features?.roadAccess && (
-              <Stat label="Road access" value={listing.features.roadAccess.toLowerCase()} />
-            )}
+          {/* enquiry */}
+          <div id="enquire" className="scroll-mt-20">
+            <EnquiryForm listingId={listing.id} />
           </div>
-
-          {listing.description && (
-            <div>
-              <h2 className="mb-1 font-medium">Description</h2>
-              <p className="whitespace-pre-line text-sm text-[var(--foreground)]">{listing.description}</p>
-            </div>
-          )}
-
-          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-[var(--foreground)]">
-            <strong>What was checked:</strong> listing details only. This is <em>not</em> a title
-            guarantee or a legal/document review. Coordinates: {loc.latitude}, {loc.longitude}.
-          </div>
-        </div>
-
-        <div className="lg:sticky lg:top-6 lg:self-start">
-          <EnquiryForm listingId={listing.id} />
         </div>
       </div>
-    </div>
-  );
-}
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
-      <p className="text-xs text-[var(--muted)]">{label}</p>
-      <p className="mt-0.5 text-sm font-medium capitalize">{value}</p>
+      {/* ---------- mobile sticky action bar ---------- */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border)] bg-[var(--card)]/95 p-3 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-extrabold">{formatPrice(listing.price)}</p>
+            <p className="truncate text-xs text-[var(--muted)]">{formatArea(listing.area)}</p>
+          </div>
+          <a href="#enquire" className="btn-accent px-6 py-3">Enquire now</a>
+        </div>
+      </div>
     </div>
   );
 }

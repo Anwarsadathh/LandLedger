@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { ListingCard } from "@/components/ListingCard";
 import { MarketplaceFilters } from "@/components/MarketplaceFilters";
+import { Reveal } from "@/components/Reveal";
+import type { PublicListing } from "@/server/modules/listings/dto";
+import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
 import { searchPublicListings } from "@/server/modules/listings/service";
 
 export const dynamic = "force-dynamic";
+
+// Curated, premium architecture shot — independent of listing data so the hero
+// always looks intentional (a luxury home at dusk under a deep black wash).
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2000&q=80";
 
 type SearchParams = Promise<{
   state?: string;
@@ -43,7 +51,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const sp = await searchParams;
   const hasFilters = !!(sp.state || sp.city || sp.type || sp.q || sp.priceMin || sp.priceMax);
 
-  // ---------- Search-results view (when the user has searched) ----------
+  // ---------- Search-results view ----------
   if (hasFilters) {
     const { items, ok } = await getListings({
       state: sp.state,
@@ -54,7 +62,6 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       priceMax: sp.priceMax ? Number(sp.priceMax) : undefined,
       limit: 48,
     });
-
     return (
       <div className="flex flex-col gap-6">
         <div>
@@ -63,198 +70,321 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             {ok ? `${items.length} listing${items.length === 1 ? "" : "s"} found` : "Couldn’t load listings right now."}
           </p>
         </div>
-
         <MarketplaceFilters
           initial={{ q: sp.q, state: sp.state, city: sp.city, type: sp.type, priceMin: sp.priceMin, priceMax: sp.priceMax }}
         />
-
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[var(--border)] p-12 text-center">
+          <div className="card border-dashed p-12 text-center">
             <p className="font-medium">No listings match your filters</p>
-            <p className="mx-auto mt-1 max-w-md text-sm text-[var(--muted)]">
-              Try widening your search, or clear the filters to see everything.
-            </p>
-            <Link href="/" className="btn-ghost mt-4 inline-flex">
-              Clear filters
-            </Link>
+            <p className="mx-auto mt-1 max-w-md text-sm text-[var(--muted)]">Try widening your search, or clear the filters.</p>
+            <Link href="/" className="btn-ghost mt-4 inline-flex">Clear filters</Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((l) => (
-              <ListingCard key={l.id} listing={l} />
-            ))}
+            {items.map((l) => <ListingCard key={l.id} listing={l} />)}
           </div>
         )}
       </div>
     );
   }
 
-  // ---------- Landing view ----------
-  const { items: featured } = await getListings({ limit: 6 });
+  // ---------- Landing ----------
+  const { items: featured } = await getListings({ limit: 12 });
+  const popular = featured.slice(0, 8);
+  const recent = featured.slice(0, 6);
+  const more = (featured.length > 6 ? featured.slice(6) : featured).slice(0, 5);
 
   return (
-    <div className="flex flex-col gap-20 pb-6">
-      {/* HERO */}
-      <section className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-5 py-12 sm:px-10 sm:py-16">
-        <div className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full bg-blue-300/30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-indigo-300/20 blur-3xl" />
+    <div className="flex flex-col gap-16">
+      {/* ===== HERO ===== */}
+      <section
+        className="full-bleed relative -mt-8 flex min-h-[90vh] items-center overflow-hidden bg-[#0b0a08] text-white"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(8,7,5,0.35) 0%, rgba(8,7,5,0.3) 45%, rgba(8,7,5,0.62) 100%), url(${HERO_IMAGE})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* soft vignette */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,transparent_45%,rgba(0,0,0,0.35)_100%)]" />
+        {/* single soft gold glow — subtle, not muddy */}
+        <div className="animate-float-slow pointer-events-none absolute -top-24 right-[14%] h-96 w-96 rounded-full bg-[var(--accent)]/15 blur-[150px]" />
 
-        <div className="relative mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-3 py-1 text-xs font-medium text-blue-700 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-            Land &amp; property across India
-          </span>
-
-          <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-[var(--foreground)] sm:text-6xl">
-            Find land &amp; property{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              you can trust
+        <div className="relative mx-auto w-full max-w-6xl px-4 py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+              Land &amp; property across India
             </span>
-            .
-          </h1>
 
-          <p className="mx-auto mt-5 max-w-xl text-base text-[var(--muted)] sm:text-lg">
-            A transparent marketplace for plots, homes and farmland. Every listing shows exactly what
-            was checked — no misleading “Verified” badges.
-          </p>
+            <h1 className="animate-fade-up mt-6 text-5xl font-extrabold leading-[1.04] tracking-tight sm:text-7xl" style={{ animationDelay: "0.08s" }}>
+              Find a place{" "}
+              <span className="text-shimmer bg-gradient-to-r from-amber-200 via-[#f0a86a] to-amber-200 bg-clip-text text-transparent">
+                you&apos;ll love
+              </span>
+              .
+            </h1>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/listings/new" className="btn-primary px-6 py-2.5 text-base">
-              List your property
-            </Link>
-            <a href="#listings" className="btn-ghost px-6 py-2.5 text-base">
-              Browse listings
-            </a>
+            <p className="animate-fade-up mx-auto mt-6 max-w-xl text-lg text-white/75" style={{ animationDelay: "0.16s" }}>
+              Plots, homes and farmland across India — on a marketplace that shows exactly what was
+              checked. No fake “Verified” badges, ever.
+            </p>
+
+            <div className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "0.24s" }}>
+              <Link href="/listings/new" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-semibold text-[var(--foreground)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5">
+                List your property
+                <Arrow />
+              </Link>
+              <a href="#listings" className="hidden items-center rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:inline-flex">
+                Browse listings
+              </a>
+            </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[var(--muted)]">
-            <TrustChip>Free to list</TrustChip>
-            <TrustChip>Human-reviewed</TrustChip>
-            <TrustChip>Local units — bigha, katha, acre</TrustChip>
+          <div className="animate-fade-up mx-auto mt-10 max-w-3xl" style={{ animationDelay: "0.4s" }}>
+            <div className="rounded-2xl shadow-2xl shadow-black/40">
+              <MarketplaceFilters initial={{}} variant="compact" />
+            </div>
           </div>
-        </div>
-
-        {/* Search card */}
-        <div className="relative mx-auto mt-9 max-w-4xl">
-          <p className="mb-2 px-1 text-sm font-medium text-[var(--foreground)]">Search listings</p>
-          <MarketplaceFilters initial={{}} />
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <section>
-        <SectionHeader title="Browse by category" sub="Jump straight to what you’re looking for." />
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {CATEGORIES.map((c) => (
+      {/* ===== CATEGORY CHIPS ===== */}
+      <section className="-mt-6">
+        <div className="no-scrollbar flex gap-2.5 overflow-x-auto pb-1">
+          {CHIPS.map((c) => (
             <Link
-              key={c.type}
-              href={`/?type=${c.type}`}
-              className="group flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100"
+              key={c.label}
+              href={c.type ? `/?type=${c.type}` : "#listings"}
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
+                c.active
+                  ? "border-transparent bg-[var(--foreground)] text-white"
+                  : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--foreground)] hover:text-[var(--foreground)]"
+              }`}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
-                {c.icon}
-              </span>
-              <span>
-                <span className="block font-semibold">{c.label}</span>
-                <span className="mt-0.5 block text-xs text-[var(--muted)]">{c.desc}</span>
-              </span>
+              {c.label}
             </Link>
           ))}
         </div>
       </section>
 
-      {/* FEATURED LISTINGS */}
-      <section id="listings" className="scroll-mt-20">
-        <SectionHeader
-          title="Recently listed"
-          sub="Fresh plots, homes and land from owners and brokers."
-          action={<Link href="/?type=LAND_PLOT" className="text-sm font-medium text-blue-600 hover:underline">View all →</Link>}
-        />
-        {featured.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[var(--border)] p-12 text-center text-sm text-[var(--muted)]">
-            No published listings yet — be the first to{" "}
-            <Link href="/listings/new" className="font-medium text-blue-600 hover:underline">list a property</Link>.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((l) => (
-              <ListingCard key={l.id} listing={l} />
-            ))}
-          </div>
-        )}
+      {/* ===== QUICK TILES ===== */}
+      <section>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {QUICK_TILES.map((t, i) => (
+            <Reveal key={t.label} delay={i * 70}>
+              <Link
+                href={t.href}
+                className="group relative flex aspect-[5/4] flex-col justify-end overflow-hidden rounded-2xl bg-[#1b1813] p-4 text-white"
+                style={
+                  featured[i]?.media?.[0]?.url
+                    ? {
+                        backgroundImage: `linear-gradient(to top, rgba(27,24,19,0.88), rgba(27,24,19,0.15)), url(${featured[i].media[0].url})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }
+                    : undefined
+                }
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur transition group-hover:bg-[var(--accent)]">
+                  {t.icon}
+                </span>
+                <span className="mt-3 block font-semibold">{t.label}</span>
+                <span className="text-xs text-white/70">{t.sub}</span>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {featured.length === 0 ? (
+        <section id="listings" className="scroll-mt-24">
+          <div className="card border-dashed p-12 text-center text-sm text-[var(--muted)]">
+            No published listings yet — be the first to{" "}
+            <Link href="/listings/new" className="font-medium text-[var(--accent)] hover:underline">list a property</Link>.
+          </div>
+        </section>
+      ) : (
+        <>
+          {/* ===== POPULAR (overlay card scroll row) ===== */}
+          <section id="listings" className="scroll-mt-24">
+            <SectionHead eyebrow="Trending" title="Popular right now" action={<Link href="/?type=LAND_PLOT" className="text-sm font-semibold text-[var(--accent)] hover:underline">See all →</Link>} />
+            <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+              {popular.map((l) => (
+                <div key={l.id} className="w-[220px] shrink-0 snap-start sm:w-[250px]">
+                  <OverlayCard listing={l} />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ===== RECENTLY LISTED (grid) ===== */}
+          <section>
+            <SectionHead eyebrow="Marketplace" title="Recently listed" sub="Fresh plots, homes and land from owners and brokers." action={<Link href="/?type=RESIDENTIAL" className="text-sm font-semibold text-[var(--accent)] hover:underline">View all →</Link>} />
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {recent.map((l, i) => (
+                <Reveal key={l.id} delay={(i % 3) * 90}>
+                  <ListingCard listing={l} />
+                </Reveal>
+              ))}
+            </div>
+          </section>
+
+          {/* ===== MORE (list rows) ===== */}
+          {more.length > 0 && (
+            <section>
+              <SectionHead eyebrow="Keep exploring" title="More across India" />
+              <div className="flex flex-col gap-3">
+                {more.map((l) => (
+                  <ListRow key={l.id} listing={l} />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      {/* ===== HOW IT WORKS ===== */}
       <section>
-        <SectionHeader title="List in minutes" sub="From your phone to the marketplace in three steps." />
+        <SectionHead eyebrow="For owners & brokers" title="List in minutes" sub="From your phone to the marketplace in three steps." />
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {STEPS.map((s, i) => (
-            <div key={s.title} className="relative rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-                {i + 1}
-              </span>
-              <h3 className="mt-4 font-semibold">{s.title}</h3>
-              <p className="mt-1 text-sm text-[var(--muted)]">{s.body}</p>
-            </div>
+            <Reveal key={s.title} delay={i * 110}>
+              <div className="card h-full p-6 shadow-sm">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--foreground)] text-sm font-bold text-white">{i + 1}</span>
+                <h3 className="mt-4 font-semibold">{s.title}</h3>
+                <p className="mt-1 text-sm text-[var(--muted)]">{s.body}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* WHY / TRUST */}
+      {/* ===== WHY ===== */}
       <section>
-        <SectionHeader
-          title="Built on honesty, not hype"
-          sub="The things that actually matter when money and land are on the line."
-        />
+        <SectionHead eyebrow="Why OROVA" title="Built on honesty, not hype" sub="The things that matter when money and land are on the line." />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                {f.icon}
-              </span>
-              <h3 className="mt-4 font-semibold">{f.title}</h3>
-              <p className="mt-1 text-sm text-[var(--muted)]">{f.body}</p>
-            </div>
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.title} delay={i * 90}>
+              <div className="card h-full p-6 shadow-sm transition hover:shadow-lg">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">{f.icon}</span>
+                <h3 className="mt-4 font-semibold">{f.title}</h3>
+                <p className="mt-1 text-sm text-[var(--muted)]">{f.body}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* CTA BAND */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 px-6 py-12 text-center sm:px-10 sm:py-16">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Ready to list your property?</h2>
-          <p className="mx-auto mt-3 max-w-lg text-blue-100">
-            It’s free. Add your plot, home or land, drop a map pin, and reach buyers across India — your
-            contact details stay private.
-          </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/listings/new"
-              className="inline-flex items-center justify-center rounded-md bg-white px-6 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
-            >
-              List a property — free
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex items-center justify-center rounded-md border border-white/40 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Create an account
-            </Link>
-          </div>
+      {/* ===== CTA ===== */}
+      <section className="full-bleed relative overflow-hidden bg-[#1b1813] text-white">
+        <div className="animate-float-slow pointer-events-none absolute -left-16 top-0 h-72 w-72 rounded-full bg-[var(--accent)]/20 blur-[120px]" />
+        <div className="animate-float-slow pointer-events-none absolute -right-12 bottom-0 h-72 w-72 rounded-full bg-[var(--accent)]/15 blur-[120px]" style={{ animationDelay: "-7s" }} />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:py-24">
+          <Reveal>
+            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+              Ready to list your{" "}
+              <span className="text-shimmer bg-gradient-to-r from-amber-200 to-[#f0a86a] bg-clip-text text-transparent">property</span>?
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-white/75">
+              It’s free. Add your plot, home or land, drop a map pin, and reach buyers across India —
+              your contact details stay private.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/listings/new" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5">
+                List a property — free <Arrow />
+              </Link>
+              <Link href="/signup" className="inline-flex items-center rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/10">
+                Create an account
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </div>
   );
 }
 
+/* ---------------- cards ---------------- */
+
+function OverlayCard({ listing }: { listing: PublicListing }) {
+  const cover = listing.media[0]?.url;
+  const typeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
+  return (
+    <Link
+      href={`/listings/${listing.slug}`}
+      className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-2xl bg-[var(--accent-soft)] p-4 text-white"
+    >
+      {cover ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={cover} alt={listing.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+      ) : null}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+      <div className="relative">
+        <span className="inline-block max-w-full truncate rounded-full bg-white/90 px-2.5 py-0.5 align-top text-[11px] font-semibold text-[var(--foreground)]">{typeLabel}</span>
+        <h3 className="mt-2 line-clamp-1 font-semibold drop-shadow">{listing.title}</h3>
+        <p className="mt-0.5 line-clamp-1 text-xs text-white/80">
+          {listing.location.locality ? `${listing.location.locality}, ` : ""}{stateLabel(listing.location.state)}
+        </p>
+        <p className="mt-1.5 truncate text-sm font-bold">{formatPrice(listing.price)}</p>
+      </div>
+    </Link>
+  );
+}
+
+function ListRow({ listing }: { listing: PublicListing }) {
+  const cover = listing.media[0]?.url;
+  const typeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
+  return (
+    <Link
+      href={`/listings/${listing.slug}`}
+      className="group flex gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2.5 transition hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[var(--accent-soft)] sm:w-24">
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} alt={listing.title} className="h-full w-full object-cover" />
+        ) : null}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="line-clamp-1 font-semibold group-hover:text-[var(--accent)]">{listing.title}</h3>
+            <p className="mt-0.5 line-clamp-1 text-xs text-[var(--muted)]">
+              {listing.location.locality ? `${listing.location.locality}, ` : ""}
+              {listing.location.district}, {stateLabel(listing.location.state)}
+            </p>
+          </div>
+          <p className="shrink-0 whitespace-nowrap text-right text-sm font-extrabold tracking-tight sm:text-base">
+            {formatPrice(listing.price)}
+          </p>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--muted)]">
+          <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 font-medium text-[var(--accent)]">{typeLabel}</span>
+          <span>{formatArea(listing.area)}</span>
+          <span className="h-1 w-1 rounded-full bg-[var(--muted)]/60" />
+          <span>{listing.transactionType === "SALE" ? "For sale" : "For lease"}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 /* ---------------- content ---------------- */
 
-const CATEGORIES = [
-  { label: "Land & Plots", type: "LAND_PLOT", desc: "Residential & commercial plots", icon: <IconMap /> },
-  { label: "Residential", type: "RESIDENTIAL", desc: "Flats, villas, builder floors", icon: <IconHome /> },
-  { label: "Commercial", type: "COMMERCIAL", desc: "Offices, shops, warehouses", icon: <IconBuilding /> },
-  { label: "Agricultural", type: "AGRICULTURAL", desc: "Farmland & orchards", icon: <IconSprout /> },
+const CHIPS = [
+  { label: "All", type: "", active: true },
+  { label: "Land & Plots", type: "LAND_PLOT", active: false },
+  { label: "Residential", type: "RESIDENTIAL", active: false },
+  { label: "Commercial", type: "COMMERCIAL", active: false },
+  { label: "Agricultural", type: "AGRICULTURAL", active: false },
+];
+
+const QUICK_TILES = [
+  { label: "Land & Plots", sub: "Residential & commercial plots", href: "/?type=LAND_PLOT", icon: <IconMap /> },
+  { label: "Ready homes", sub: "Flats, villas & floors", href: "/?type=RESIDENTIAL", icon: <IconHome /> },
+  { label: "Commercial", sub: "Offices, shops, warehouses", href: "/?type=COMMERCIAL", icon: <IconBuilding /> },
+  { label: "Farmland", sub: "Agricultural & orchards", href: "/?type=AGRICULTURAL", icon: <IconSprout /> },
 ];
 
 const STEPS = [
@@ -272,26 +402,24 @@ const FEATURES = [
 
 /* ---------------- primitives ---------------- */
 
-function SectionHeader({ title, sub, action }: { title: string; sub?: string; action?: React.ReactNode }) {
+function SectionHead({ eyebrow, title, sub, action }: { eyebrow: string; title: string; sub?: string; action?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
+    <div className="mb-5 flex items-end justify-between gap-4">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
-        {sub && <p className="mt-1 text-sm text-[var(--muted)]">{sub}</p>}
+        <p className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)]">{eyebrow}</p>
+        <h2 className="mt-1.5 text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
+        {sub && <p className="mt-1.5 text-sm text-[var(--muted)]">{sub}</p>}
       </div>
       {action && <div className="shrink-0 pb-1">{action}</div>}
     </div>
   );
 }
 
-function TrustChip({ children }: { children: React.ReactNode }) {
+function Arrow() {
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-blue-600" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 6L9 17l-5-5" />
-      </svg>
-      {children}
-    </span>
+    <svg viewBox="0 0 24 24" className="h-4 w-4 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
   );
 }
 
@@ -299,7 +427,7 @@ function TrustChip({ children }: { children: React.ReactNode }) {
 
 function Svg({ children }: { children: React.ReactNode }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
       {children}
     </svg>
   );

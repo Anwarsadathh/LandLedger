@@ -166,7 +166,7 @@ export default function AdminDashboard() {
               className={`rounded-md px-3 py-1.5 text-sm transition ${
                 tab === t.key
                   ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-                  : "text-[var(--muted)] hover:bg-blue-50 hover:text-[var(--foreground)]"
+                  : "text-[var(--muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--foreground)]"
               }`}
             >
               {t.label}

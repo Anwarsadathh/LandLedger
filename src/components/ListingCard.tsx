@@ -4,35 +4,64 @@ import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/
 
 export function ListingCard({ listing }: { listing: PublicListing }) {
   const cover = listing.media[0]?.url;
+  const typeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
+
   return (
     <Link
       href={`/listings/${listing.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] transition hover:border-[var(--primary)] hover:shadow-sm"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5"
     >
-      <div className="aspect-[16/10] w-full overflow-hidden bg-[var(--background)]">
+      <div className="relative aspect-[16/11] w-full overflow-hidden bg-[var(--accent-soft)]">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover} alt={listing.title} className="h-full w-full object-cover" />
+          <img
+            src={cover}
+            alt={listing.title}
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs text-[var(--muted)]">
-            No photo
-          </div>
+          <div className="flex h-full w-full items-center justify-center text-xs text-[var(--muted)]">No photo</div>
         )}
-      </div>
-      <div className="flex flex-1 flex-col gap-1 p-4">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-[var(--muted)]">
-          <span>{listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType}</span>
-          <span>·</span>
-          <span>{listing.transactionType === "SALE" ? "For sale" : "For lease"}</span>
+
+        {/* type + transaction pills */}
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          <span className="inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[var(--foreground)] shadow-sm backdrop-blur">
+            {typeLabel}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-[var(--foreground)]/85 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+            {listing.transactionType === "SALE" ? "For sale" : "For lease"}
+          </span>
         </div>
-        <h3 className="line-clamp-2 font-medium group-hover:text-[var(--primary)]">{listing.title}</h3>
-        <p className="text-sm text-[var(--muted)]">
-          {listing.location.locality ? `${listing.location.locality}, ` : ""}
-          {listing.location.district}, {stateLabel(listing.location.state)}
-        </p>
-        <div className="mt-auto pt-2">
-          <p className="font-semibold">{formatPrice(listing.price)}</p>
-          <p className="text-sm text-[var(--muted)]">{formatArea(listing.area)}</p>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2.5 p-4">
+        <div>
+          <h3 className="line-clamp-1 font-semibold tracking-tight group-hover:text-[var(--accent)]">
+            {listing.title}
+          </h3>
+          <p className="mt-0.5 flex items-center gap-1 text-sm text-[var(--muted)]">
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11Z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+            <span className="line-clamp-1">
+              {listing.location.locality ? `${listing.location.locality}, ` : ""}
+              {listing.location.district}, {stateLabel(listing.location.state)}
+            </span>
+          </p>
+        </div>
+
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-[var(--border)] pt-3">
+          <div>
+            <p className="text-lg font-extrabold tracking-tight">{formatPrice(listing.price)}</p>
+            <p className="text-xs text-[var(--muted)]">{formatArea(listing.area)}</p>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--accent)] transition group-hover:bg-[var(--accent)] group-hover:text-white">
+            View
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </span>
         </div>
       </div>
     </Link>

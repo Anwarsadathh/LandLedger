@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     if (!coords) {
       const res = await fetch(raw, {
         redirect: "follow",
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; LandLedger/1.0)" },
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; OROVA/1.0)" },
       });
       coords = extractCoords(res.url);
       if (!coords) coords = extractCoords(await res.text());

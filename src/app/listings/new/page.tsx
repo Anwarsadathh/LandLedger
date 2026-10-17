@@ -664,8 +664,8 @@ function Chip({ selected, onClick, children }: { selected: boolean; onClick: () 
       onClick={onClick}
       className={`rounded-full border px-4 py-2 text-sm transition ${
         selected
-          ? "border-[var(--primary)] bg-blue-50 font-medium text-[var(--primary)]"
-          : "border-[var(--border)] text-[var(--foreground)] hover:border-[var(--primary)]"
+          ? "border-transparent bg-[var(--foreground)] font-medium text-white"
+          : "border-[var(--border)] text-[var(--foreground)] hover:border-[var(--foreground)]"
       }`}
     >
       {children}

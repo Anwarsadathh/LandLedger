@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "LandLedger/1.0 (property listing app)",
+        "User-Agent": "OROVA/1.0 (property listing app)",
         "Accept-Language": "en",
       },
     });

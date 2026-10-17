@@ -86,7 +86,7 @@ export function Combobox({
               <button
                 type="button"
                 onClick={() => commit(o)}
-                className="block w-full px-3 py-2 text-left hover:bg-blue-50"
+                className="block w-full px-3 py-2 text-left hover:bg-[var(--accent-soft)]"
               >
                 {o}
               </button>
@@ -97,7 +97,7 @@ export function Combobox({
               <button
                 type="button"
                 onClick={() => commit(query.trim())}
-                className="block w-full px-3 py-2 text-left font-medium text-[var(--primary)] hover:bg-blue-50"
+                className="block w-full px-3 py-2 text-left font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]"
               >
                 Use “{query.trim()}”
               </button>

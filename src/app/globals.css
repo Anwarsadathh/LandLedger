@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* Forced light theme — ignores the browser/OS dark-mode preference. */
+  /* Forced light theme — warm, editorial palette (charcoal + amber accent). */
   color-scheme: light;
-  --background: #f4f6f9;   /* soft cool off-white — gentle, not stark white */
-  --foreground: #16202e;   /* deep slate — easier on the eyes than pure black */
-  --muted: #5b6775;        /* readable secondary text */
-  --border: #e3e8ef;       /* soft hairline borders */
-  --card: #ffffff;         /* white cards lift off the tinted background */
-  --primary: #1d4ed8;
+  --background: #f7f4ef;        /* warm cream */
+  --foreground: #1b1813;        /* warm near-black */
+  --muted: #8a8075;             /* warm gray secondary text */
+  --border: #ece6dc;            /* warm hairline borders */
+  --card: #ffffff;              /* white cards lift off the cream background */
+  --primary: #1b1813;           /* charcoal primary (buttons/CTAs) */
   --primary-foreground: #ffffff;
+  --accent: #e0813f;            /* warm amber / terracotta accent */
+  --accent-foreground: #ffffff;
+  --accent-soft: #fbeee2;       /* soft amber tint for icon chips */
 }
 
 @theme inline {
@@ -20,6 +23,8 @@
   --color-card: var(--card);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -28,19 +33,116 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden; /* full-bleed sections use 100vw */
 }
 
 @layer components {
   .input {
-    @apply rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)];
+    @apply rounded-xl border border-[var(--border)] bg-[var(--card)] px-3.5 py-2.5 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--foreground)];
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] transition hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:border-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-[var(--accent-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--card)] px-4 py-1.5 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)];
+  }
+  .chip-active {
+    @apply border-transparent bg-[var(--foreground)] text-white;
+  }
+  .card {
+    @apply rounded-2xl border border-[var(--border)] bg-[var(--card)];
   }
   .badge {
-    @apply inline-flex items-center rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--muted)];
+    @apply inline-flex items-center rounded-full border border-[var(--border)] px-2.5 py-0.5 text-xs text-[var(--muted)];
+  }
+}
+
+/* ---------- full-bleed ---------- */
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+/* ---------- horizontal scroll rows ---------- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ---------- scroll reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- hero entrance + motion ---------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(26px, -30px) scale(1.14);
+  }
+}
+@keyframes gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.animate-float-slow {
+  animation: float-slow 18s ease-in-out infinite;
+}
+.text-shimmer {
+  background-size: 200% auto;
+  animation: gradient-pan 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-fade-up,
+  .animate-float-slow,
+  .text-shimmer {
+    animation: none !important;
   }
 }
