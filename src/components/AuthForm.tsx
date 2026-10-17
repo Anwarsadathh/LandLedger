@@ -28,7 +28,6 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const next = params.get("next");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [socialNote, setSocialNote] = useState(false);
 
   const isSignup = mode === "signup";
   const nextQs = next ? `?next=${encodeURIComponent(next)}` : "";
@@ -182,14 +181,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
           )}
           <div className="flex flex-col gap-2.5">
             <SocialButton label="Continue with Google" icon={<GoogleIcon />} href={`/api/v1/auth/google${nextQs}`} />
-            <SocialButton label="Continue with Apple" icon={<AppleIcon />} onClick={() => setSocialNote(true)} />
-            <SocialButton label="Continue with Facebook" icon={<FacebookIcon />} onClick={() => setSocialNote(true)} />
           </div>
-          {socialNote && (
-            <p className="mt-3 text-center text-xs text-[var(--accent)]">
-              Social sign-in is coming soon — please use your email for now.
-            </p>
-          )}
 
           <p className="mt-6 text-center text-sm text-[var(--muted)]">
             {isSignup ? (
@@ -246,20 +238,6 @@ function GoogleIcon() {
       <path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.95-2.91l-3.88-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A12 12 0 0 0 12 24Z" />
       <path fill="#FBBC05" d="M5.27 14.29A7.21 7.21 0 0 1 4.89 12c0-.8.14-1.57.38-2.29V6.62H1.29A12 12 0 0 0 0 12c0 1.94.46 3.77 1.29 5.38l3.98-3.09Z" />
       <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44A11.5 11.5 0 0 0 12 0 12 12 0 0 0 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75Z" />
-    </svg>
-  );
-}
-function AppleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden>
-      <path d="M16.37 12.6c-.03-2.6 2.12-3.85 2.22-3.91-1.21-1.77-3.1-2.01-3.77-2.04-1.6-.16-3.13.94-3.94.94-.81 0-2.07-.92-3.4-.9-1.75.03-3.37 1.02-4.27 2.59-1.82 3.16-.47 7.83 1.3 10.4.86 1.26 1.89 2.67 3.24 2.62 1.3-.05 1.79-.84 3.36-.84 1.57 0 2.01.84 3.39.81 1.4-.02 2.29-1.28 3.15-2.55.99-1.46 1.4-2.88 1.42-2.95-.03-.01-2.72-1.04-2.75-4.12ZM13.9 4.9c.72-.87 1.2-2.08 1.07-3.29-1.03.04-2.29.69-3.03 1.56-.66.77-1.24 2-1.08 3.18 1.15.09 2.33-.58 3.04-1.45Z" />
-    </svg>
-  );
-}
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
-      <path fill="#1877F2" d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.93-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12Z" />
     </svg>
   );
 }
