@@ -91,7 +91,7 @@ export default async function ProfilePage() {
         <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
           <Row label="Full name" value={profile.name} />
           <Row label="Email" value={profile.email || "—"} />
-          <Row label="Mobile" value={profile.phone ? `+91 ${profile.phone}` : "—"} />
+          <Row label="Mobile" value={profile.phone ? `+91 ${profile.phone}${profile.phoneVerified ? " · Verified" : ""}` : "—"} />
           <Row label="First name" value={profile.givenName ?? "—"} />
           <Row label="Last name" value={profile.familyName ?? "—"} />
           <Row label="Sign-in method" value={viaGoogle ? "Google" : "Email & password"} />

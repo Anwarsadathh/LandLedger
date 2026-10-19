@@ -16,6 +16,7 @@ export type UserProfile = {
   role: Role;
   authProvider: string;
   emailVerified: boolean;
+  phoneVerified: boolean;
   avatarUrl: string | null;
   givenName: string | null;
   familyName: string | null;
@@ -42,6 +43,7 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
     role: user.role as Role,
     authProvider: (user.authProvider as string) ?? "password",
     emailVerified: Boolean(user.emailVerified),
+    phoneVerified: Boolean(user.phoneVerified),
     avatarUrl: user.avatarUrl ?? null,
     givenName: user.givenName ?? null,
     familyName: user.familyName ?? null,
@@ -60,16 +62,10 @@ export async function registerUser(input: RegisterInput): Promise<AuthedUser> {
   if (existing) {
     throw new ApiError("EMAIL_TAKEN", "An account with this email already exists.", 409);
   }
-  const phoneTaken = await User.findOne({ phone: input.phone });
-  if (phoneTaken) {
-    throw new ApiError("PHONE_TAKEN", "An account with this mobile number already exists.", 409);
-  }
-
   const passwordHash = await hashPassword(input.password);
   const user = await User.create({
     name: input.name.trim(),
     email,
-    phone: input.phone,
     passwordHash,
     role: "OWNER",
     status: "ACTIVE",
@@ -155,6 +151,47 @@ export async function findOrCreateGoogleUser(profile: {
   });
 
   return { id: String(user._id), name: user.name, email, role: user.role as Role, needsPhone: true };
+}
+
+/**
+ * Mobile-OTP sign-in / sign-up. The number is already verified by the OTP step.
+ * Finds the user by phone, or creates a new OWNER. An optional name is used for
+ * new accounts (or to fill a missing name).
+ */
+export async function findOrCreatePhoneUser(phone: string, name?: string): Promise<AuthedUser> {
+  await connectToDatabase();
+
+  let user = await User.findOne({ phone });
+  if (user) {
+    if (user.status !== "ACTIVE") {
+      throw new ApiError("ACCOUNT_SUSPENDED", "This account is suspended.", 403);
+    }
+    user.phoneVerified = true;
+    if (name && !user.name) user.name = name.trim();
+    user.lastLoginAt = new Date();
+    await user.save();
+    return { id: String(user._id), name: user.name, email: user.email ?? "", role: user.role as Role };
+  }
+
+  user = await User.create({
+    name: name?.trim() || "Member",
+    phone,
+    authProvider: "phone",
+    phoneVerified: true,
+    role: "OWNER",
+    status: "ACTIVE",
+    lastLoginAt: new Date(),
+  });
+
+  await recordAudit({
+    actorId: String(user._id),
+    actorRole: "OWNER",
+    action: "USER_REGISTERED_PHONE",
+    entityType: "User",
+    entityId: String(user._id),
+  });
+
+  return { id: String(user._id), name: user.name, email: user.email ?? "", role: user.role as Role };
 }
 
 /** Set / update the signed-in user's mobile number (enforces uniqueness). */

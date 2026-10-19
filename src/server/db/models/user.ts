@@ -13,8 +13,9 @@ const UserSchema = new Schema(
     passwordHash: { type: String, select: false },
     // OAuth (Google) identity. googleId is the provider's stable subject id.
     googleId: { type: String, unique: true, sparse: true },
-    authProvider: { type: String, enum: ["password", "google"], default: "password" },
+    authProvider: { type: String, enum: ["password", "google", "phone"], default: "password" },
     emailVerified: { type: Boolean, default: false },
+    phoneVerified: { type: Boolean, default: false },
     // Profile data collected from the identity provider.
     avatarUrl: { type: String },
     givenName: { type: String },
