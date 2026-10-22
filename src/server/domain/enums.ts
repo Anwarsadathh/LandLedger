@@ -74,6 +74,11 @@ export type WorkflowStatus = (typeof WORKFLOW_STATUSES)[number];
 export const SUBMITTER_ROLES = ["OWNER", "AUTHORISED_REP", "BROKER"] as const;
 export type SubmitterRole = (typeof SUBMITTER_ROLES)[number];
 
+// Language the owner wrote the listing's title/description in. We never translate
+// — the owner types in their own script; this just records which language it is.
+export const CONTENT_LANGUAGES = ["EN", "HI", "KN", "ML"] as const;
+export type ContentLanguage = (typeof CONTENT_LANGUAGES)[number];
+
 // Enquiry / lead pipeline (handover spec §16) — baseline stages.
 export const LEAD_STATUSES = [
   "NEW",

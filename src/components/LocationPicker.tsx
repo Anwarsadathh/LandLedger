@@ -1,6 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import "leaflet/dist/leaflet.css";
+
+type Leaflet = typeof import("leaflet");
+type LMap = import("leaflet").Map;
+type LMarker = import("leaflet").Marker;
+
+const DEFAULT_CENTER: [number, number] = [20.5937, 78.9629]; // India
+const DEFAULT_ZOOM = 5;
 
 // Pull coordinates straight out of a full Google Maps URL (or a pasted
 // "lat, lng"). Shortened share links are resolved server-side instead.
@@ -22,6 +30,19 @@ function extractCoords(url: string): { lat: number; lng: number } | null {
   return null;
 }
 
+// A themed pin as a divIcon (avoids Leaflet's broken default-image paths).
+function pinIcon(L: Leaflet) {
+  return L.divIcon({
+    className: "",
+    html: `<svg viewBox="0 0 24 24" width="32" height="32" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))">
+      <path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7Z" fill="#e0813f" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="12" cy="9" r="2.6" fill="#fff"/>
+    </svg>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 30],
+  });
+}
+
 export function LocationPicker({
   latitude,
   longitude,
@@ -33,36 +54,141 @@ export function LocationPicker({
   onChange: (lat: string, lng: string) => void;
   onAddress?: (addr: { state?: string | null; city?: string | null; locality?: string | null }) => void;
 }) {
-  const [link, setLink] = useState("");
   const [status, setStatus] = useState<"idle" | "busy" | "error">("idle");
   const [msg, setMsg] = useState<string | null>(null);
+  const [link, setLink] = useState("");
   const [manual, setManual] = useState(false);
   const [resolvingAddr, setResolvingAddr] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
+
+  const mapEl = useRef<HTMLDivElement>(null);
+  const LRef = useRef<Leaflet | null>(null);
+  const mapRef = useRef<LMap | null>(null);
+  const markerRef = useRef<LMarker | null>(null);
+  const onChangeRef = useRef(onChange);
+  const onAddressRef = useRef(onAddress);
+  const commitRef = useRef<(lat: number, lng: number, recenter?: boolean) => void>(() => {});
 
   const hasCoords = latitude !== "" && longitude !== "";
 
-  // Reverse-geocode the pin to auto-fill state / city / locality.
-  async function resolveAddress(lat: number, lng: number) {
-    if (!onAddress) return;
+  // Keep the latest callbacks without mutating refs during render.
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onAddressRef.current = onAddress;
+  });
+
+  const resolveAddress = useCallback(async (lat: number, lng: number) => {
     setResolvingAddr(true);
     try {
       const res = await fetch(`/api/v1/geo/reverse?lat=${lat}&lng=${lng}`);
       const json = await res.json();
-      if (res.ok && json.data) onAddress(json.data);
+      if (res.ok && json.data) {
+        setAddress(json.data.display ?? null);
+        onAddressRef.current?.({
+          state: json.data.state,
+          city: json.data.city,
+          locality: json.data.locality,
+        });
+      }
     } catch {
-      // Non-fatal — coordinates are still set; user can pick state/city manually.
+      // Non-fatal — the pin is still set; user can pick state/city manually.
     } finally {
       setResolvingAddr(false);
     }
-  }
+  }, []);
 
-  function apply(lat: number, lng: number) {
-    onChange(lat.toFixed(6), lng.toFixed(6));
-    setStatus("idle");
-    setMsg(null);
-    void resolveAddress(lat, lng);
-  }
+  // Set a point (from a map click, drag or geolocation): update the form + address.
+  // The marker itself is driven by the [latitude, longitude] sync effect below.
+  const commit = useCallback(
+    (lat: number, lng: number, recenter = false) => {
+      setStatus("idle");
+      setMsg(null);
+      onChangeRef.current(lat.toFixed(6), lng.toFixed(6));
+      if (recenter && mapRef.current) {
+        mapRef.current.setView([lat, lng], Math.max(mapRef.current.getZoom(), 15));
+      }
+      void resolveAddress(lat, lng);
+    },
+    [resolveAddress],
+  );
 
+  useEffect(() => {
+    commitRef.current = commit;
+  }, [commit]);
+
+  // Initialise the map once.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const mod = await import("leaflet");
+      const L = (mod as unknown as { default?: Leaflet }).default ?? (mod as unknown as Leaflet);
+      if (cancelled || !mapEl.current || mapRef.current) return;
+      LRef.current = L;
+
+      const start: [number, number] = hasCoords
+        ? [Number(latitude), Number(longitude)]
+        : DEFAULT_CENTER;
+      const map = L.map(mapEl.current).setView(start, hasCoords ? 15 : DEFAULT_ZOOM);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+      map.on("click", (e) => commitRef.current(e.latlng.lat, e.latlng.lng));
+      mapRef.current = map;
+
+      if (hasCoords) {
+        const m = L.marker(start, { draggable: true, icon: pinIcon(L) }).addTo(map);
+        m.on("dragend", () => {
+          const p = m.getLatLng();
+          commitRef.current(p.lat, p.lng);
+        });
+        markerRef.current = m;
+        setTimeout(() => {
+          if (!cancelled) void resolveAddress(start[0], start[1]);
+        }, 0);
+      }
+      setTimeout(() => map.invalidateSize(), 120);
+    })();
+    return () => {
+      cancelled = true;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the marker in sync with the coordinates (imperative Leaflet only — no setState).
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = LRef.current;
+    if (!map || !L) return;
+    if (latitude === "" || longitude === "") {
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+      return;
+    }
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (markerRef.current) {
+      markerRef.current.setLatLng([lat, lng]);
+    } else {
+      const m = L.marker([lat, lng], { draggable: true, icon: pinIcon(L) }).addTo(map);
+      m.on("dragend", () => {
+        const p = m.getLatLng();
+        commitRef.current(p.lat, p.lng);
+      });
+      markerRef.current = m;
+    }
+  }, [latitude, longitude]);
+
+  // Paste a Google Maps link (or "lat, lng") → extract coords locally, or resolve
+  // a shortened/place link server-side, then drop the pin + find the address.
   async function handleLink(value: string) {
     setLink(value);
     setMsg(null);
@@ -73,10 +199,9 @@ export function LocationPicker({
     }
     const local = extractCoords(v);
     if (local) {
-      apply(local.lat, local.lng);
+      commit(local.lat, local.lng, true);
       return;
     }
-    // Looks like a shortened/place link — resolve it on the server.
     if (/^https?:\/\//i.test(v)) {
       setStatus("busy");
       try {
@@ -87,7 +212,7 @@ export function LocationPicker({
           setMsg(json.error?.message ?? "Couldn't read that link.");
           return;
         }
-        apply(json.data.lat, json.data.lng);
+        commit(json.data.lat, json.data.lng, true);
       } catch {
         setStatus("error");
         setMsg("Network error resolving the link.");
@@ -104,13 +229,13 @@ export function LocationPicker({
     setStatus("busy");
     setMsg(null);
     navigator.geolocation.getCurrentPosition(
-      (pos) => apply(pos.coords.latitude, pos.coords.longitude),
+      (pos) => commit(pos.coords.latitude, pos.coords.longitude, true),
       (err) => {
         setStatus("error");
         setMsg(
           err.code === err.PERMISSION_DENIED
-            ? "Location permission denied — allow it or paste a Maps link."
-            : "Couldn't get your location. Try again or paste a Maps link.",
+            ? "Location permission denied — allow it or drop the pin on the map."
+            : "Couldn't get your location. Drop the pin on the map instead.",
         );
       },
       { enableHighAccuracy: true, timeout: 10000 },
@@ -124,34 +249,36 @@ export function LocationPicker({
           value={link}
           onChange={(e) => handleLink(e.target.value)}
           placeholder="Paste a Google Maps link"
-          className="input min-w-[220px] flex-1"
+          className="input min-w-[200px] flex-1"
         />
         <button type="button" onClick={useCurrentLocation} className="btn-ghost whitespace-nowrap">
           📍 Use my location
         </button>
       </div>
+      <p className="text-xs text-[var(--muted)]">
+        Paste a Maps link, use your location, or tap the map to drop a pin (drag it to fine-tune).
+      </p>
+
+      <div
+        ref={mapEl}
+        className="h-64 w-full overflow-hidden rounded-xl border border-[var(--border)]"
+        style={{ background: "var(--accent-soft)" }}
+      />
 
       {status === "busy" && <p className="text-xs text-[var(--muted)]">Finding location…</p>}
-      {resolvingAddr && <p className="text-xs text-[var(--muted)]">Filling state &amp; city from the pin…</p>}
+      {resolvingAddr && <p className="text-xs text-[var(--muted)]">Reading the address from the pin…</p>}
       {status === "error" && msg && <p className="text-xs text-red-500">{msg}</p>}
 
-      {hasCoords && status !== "error" && (
-        <div className="flex flex-col gap-2">
-          <p className="text-xs text-green-600">
-            📍 Set: {latitude}, {longitude} ·{" "}
-            <a
-              href={`https://www.google.com/maps?q=${latitude},${longitude}`}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              open in Maps ↗
-            </a>{" "}
-            ·{" "}
+      {hasCoords && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-xs">
+          {address && <p className="font-medium text-[var(--foreground)]">{address}</p>}
+          <p className="mt-0.5 text-[var(--muted)]">
+            Pin: {latitude}, {longitude} ·{" "}
             <button
               type="button"
               onClick={() => {
                 onChange("", "");
+                setAddress(null);
                 setLink("");
                 setStatus("idle");
               }}
@@ -160,13 +287,6 @@ export function LocationPicker({
               clear
             </button>
           </p>
-          <iframe
-            title="Location preview"
-            src={`https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`}
-            className="h-48 w-full rounded-lg border border-[var(--border)]"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
         </div>
       )}
 
@@ -195,11 +315,6 @@ export function LocationPicker({
           />
         </div>
       )}
-
-      <p className="text-xs text-[var(--muted)]">
-        In Google Maps, tap <strong>Share</strong> → <strong>Copy link</strong> and paste it here, or use your
-        current location.
-      </p>
     </div>
   );
 }

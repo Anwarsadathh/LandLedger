@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   AREA_UNITS,
+  CONTENT_LANGUAGES,
   FACINGS,
   LISTING_TYPES,
   PIN_PRECISIONS,
@@ -40,6 +41,7 @@ export const createListingSchema = z.object({
   transactionType: z.enum(TRANSACTION_TYPES),
   title: z.string().min(4).max(160),
   description: z.string().max(5000).optional(),
+  contentLanguage: z.enum(CONTENT_LANGUAGES).default("EN"),
   price: priceSchema,
   area: z.object({
     value: z.number().positive(),
@@ -103,6 +105,7 @@ export type ModerationDecisionInput = z.infer<typeof moderationDecisionSchema>;
 export const updateListingSchema = createListingSchema.pick({
   title: true,
   description: true,
+  contentLanguage: true,
   price: true,
   area: true,
   location: true,

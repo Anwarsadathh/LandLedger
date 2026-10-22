@@ -298,6 +298,7 @@ export async function updateListing(id: string, input: UpdateListingInput, user:
 
   doc.title = input.title;
   doc.description = input.description;
+  doc.contentLanguage = input.contentLanguage;
   doc.price = input.price;
   doc.area = { ...input.area, normalizedSqFt: areaToSqFt(input.area.value, input.area.unit) };
   doc.location = {

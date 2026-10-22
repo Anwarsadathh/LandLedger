@@ -35,6 +35,7 @@ type Form = {
   // profile
   title: string;
   description: string;
+  contentLanguage: "EN" | "HI" | "KN" | "ML";
   priceMin: string;
   priceMax: string;
   priceBasis: "TOTAL" | "PER_UNIT";
@@ -71,6 +72,7 @@ const INITIAL: Form = {
   longitude: "",
   title: "",
   description: "",
+  contentLanguage: "EN",
   priceMin: "",
   priceMax: "",
   priceBasis: "TOTAL",
@@ -90,6 +92,14 @@ const INITIAL: Form = {
   authority: false,
   consent: false,
 };
+
+const LANGUAGE_OPTIONS = [
+  { value: "EN" as const, label: "English" },
+  { value: "HI" as const, label: "हिन्दी" },
+  { value: "KN" as const, label: "ಕನ್ನಡ" },
+  { value: "ML" as const, label: "മലയാളം" },
+];
+const LANG_CODE: Record<Form["contentLanguage"], string> = { EN: "en", HI: "hi", KN: "kn", ML: "ml" };
 
 const STEPS = [
   { key: "basic", title: "Basic Details" },
@@ -210,6 +220,7 @@ export default function NewListingWizard() {
       transactionType: form.transactionType,
       title: form.title.trim(),
       description: form.description.trim() || undefined,
+      contentLanguage: form.contentLanguage,
       price: {
         min: Number(form.priceMin),
         max: form.priceMax ? Number(form.priceMax) : undefined,
@@ -478,8 +489,20 @@ function StepProfile({ form, set, errors }: StepProps) {
     <div>
       <Heading title="Tell us about the property" sub="Price, size and a few key attributes buyers look for." />
       <div className="flex max-w-xl flex-col gap-4">
+        <Field label="Listing language">
+          <ChipRow>
+            {LANGUAGE_OPTIONS.map((o) => (
+              <Chip key={o.value} selected={form.contentLanguage === o.value} onClick={() => set({ contentLanguage: o.value })}>
+                {o.label}
+              </Chip>
+            ))}
+          </ChipRow>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            Write the title &amp; description in this language — we don’t translate; your words stay exactly as you type them.
+          </p>
+        </Field>
         <Field label="Listing title" error={errors.title}>
-          <input value={form.title} onChange={(e) => set({ title: e.target.value })} className="input w-full" placeholder="e.g. East-facing residential plot near main road" />
+          <input lang={LANG_CODE[form.contentLanguage]} value={form.title} onChange={(e) => set({ title: e.target.value })} className="input w-full" placeholder="e.g. East-facing residential plot near main road" />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Expected price ₹" error={errors.priceMin}>
@@ -543,7 +566,7 @@ function StepProfile({ form, set, errors }: StepProps) {
           <input value={form.nearbyLandmarks} onChange={(e) => set({ nearbyLandmarks: e.target.value })} className="input w-full" />
         </Field>
         <Field label="Description (optional)">
-          <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={3} className="input w-full" />
+          <textarea lang={LANG_CODE[form.contentLanguage]} value={form.description} onChange={(e) => set({ description: e.target.value })} rows={3} className="input w-full" />
         </Field>
       </div>
     </div>
@@ -664,8 +687,8 @@ function Chip({ selected, onClick, children }: { selected: boolean; onClick: () 
       onClick={onClick}
       className={`rounded-full border px-4 py-2 text-sm transition ${
         selected
-          ? "border-transparent bg-[var(--foreground)] font-medium text-white"
-          : "border-[var(--border)] text-[var(--foreground)] hover:border-[var(--foreground)]"
+          ? "border-transparent bg-[var(--accent)] font-semibold text-white shadow-sm"
+          : "border-[var(--border)] text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
       }`}
     >
       {children}

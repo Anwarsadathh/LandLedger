@@ -1,6 +1,7 @@
 import mongoose, { Schema, type Model, type InferSchemaType } from "mongoose";
 import {
   AREA_UNITS,
+  CONTENT_LANGUAGES,
   FACINGS,
   LISTING_TYPES,
   PIN_PRECISIONS,
@@ -104,6 +105,8 @@ const ListingSchema = new Schema(
     transactionType: { type: String, enum: TRANSACTION_TYPES, required: true },
     title: { type: String, required: true, trim: true, maxlength: 160 },
     description: { type: String, maxlength: 5000 },
+    // Language the title/description are written in (owner-typed, never translated).
+    contentLanguage: { type: String, enum: CONTENT_LANGUAGES, default: "EN" },
 
     price: { type: PriceSchema, required: true },
     area: { type: AreaSchema, required: true },

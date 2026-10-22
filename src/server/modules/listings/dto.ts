@@ -17,6 +17,7 @@ export function toPublicListing(doc: HydratedDocument<ListingDoc>) {
     transactionType: doc.transactionType,
     title: doc.title,
     description: doc.description ?? null,
+    contentLanguage: (doc.contentLanguage as string) ?? "EN",
     price: {
       min: doc.price.min,
       max: doc.price.max ?? null,
