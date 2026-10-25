@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SiteNav, type NavUser } from "@/components/SiteNav";
+import { WelcomeModal } from "@/components/WelcomeModal";
+import { AssistantWidget } from "@/components/AssistantWidget";
 
 const BARE_ROUTES = ["/signin", "/signup"];
 
@@ -67,6 +69,9 @@ export function AppChrome({ user, children }: { user: NavUser; children: React.R
           </div>
         </div>
       </footer>
+
+      <WelcomeModal loggedIn={!!user} />
+      <AssistantWidget />
     </>
   );
 }

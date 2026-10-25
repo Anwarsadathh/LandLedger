@@ -19,9 +19,11 @@ export type FilterValues = {
 export function MarketplaceFilters({
   initial,
   variant = "full",
+  basePath = "/",
 }: {
   initial: FilterValues;
   variant?: "full" | "compact";
+  basePath?: string;
 }) {
   const router = useRouter();
   const [q, setQ] = useState(initial.q ?? "");
@@ -40,7 +42,7 @@ export function MarketplaceFilters({
     if (priceMin) p.set("priceMin", priceMin);
     if (priceMax) p.set("priceMax", priceMax);
     const qs = p.toString();
-    router.push(qs ? `/?${qs}` : "/");
+    router.push(qs ? `${basePath}?${qs}` : basePath);
   }
 
   function clear() {
@@ -50,7 +52,7 @@ export function MarketplaceFilters({
     setType("");
     setPriceMin("");
     setPriceMax("");
-    router.push("/");
+    router.push(basePath);
   }
 
   const hasFilters = q || state || city || type || priceMin || priceMax;

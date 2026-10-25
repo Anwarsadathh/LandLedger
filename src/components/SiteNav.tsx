@@ -14,6 +14,7 @@ export function SiteNav({ user }: { user: NavUser }) {
 
   const items = [
     { href: "/", label: "Marketplace", show: true },
+    { href: "/map", label: "Map", show: true },
     { href: "/?type=LAND_PLOT", label: "Land & Plots", show: true },
     { href: "/?type=RESIDENTIAL", label: "Homes", show: true },
     { href: "/?type=COMMERCIAL", label: "Commercial", show: true },
