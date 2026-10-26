@@ -39,7 +39,21 @@ export function toPublicListing(doc: HydratedDocument<ListingDoc>) {
       longitude: doc.location.longitude,
       pinPrecision: doc.location.pinPrecision,
     },
-    features: doc.features ?? null,
+    // Emit a PLAIN object (not the Mongoose subdocument) so a PublicListing can
+    // cross the Server->Client boundary (e.g. into <MapExplorer/>). A subdocument
+    // carries a toJSON method, which React Server Components refuse to serialize.
+    features: doc.features
+      ? {
+          roadAccess: doc.features.roadAccess ?? "UNKNOWN",
+          roadWidth: doc.features.roadWidth ?? null,
+          frontage: doc.features.frontage ?? null,
+          facing: doc.features.facing ?? "UNKNOWN",
+          landUseClaim: doc.features.landUseClaim ?? null,
+          utilities: doc.features.utilities ? [...doc.features.utilities] : [],
+          possessionStatus: doc.features.possessionStatus ?? null,
+          nearbyLandmarks: doc.features.nearbyLandmarks ?? null,
+        }
+      : null,
     media: (doc.media ?? []).map((m) => ({
       type: m.type,
       url: m.url,
