@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { ListingGallery } from "@/components/ListingGallery";
 import { ListingLocationMap } from "@/components/ListingLocationMap";
+import { PriceInsights } from "@/components/PriceInsights";
 import { getPublicListingBySlug } from "@/server/modules/listings/service";
 import { getOwnerRatingForSlug } from "@/server/modules/ratings/service";
+import { getPriceInsightsForListing } from "@/server/modules/insights/service";
 import { ApiError } from "@/lib/http";
 import {
   CONTENT_LANGUAGE_BCP47,
@@ -29,6 +31,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
   }
 
   const rating = await getOwnerRatingForSlug(slug);
+  const insights = await getPriceInsightsForListing(listing);
 
   const loc = listing.location;
   const subtypeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
@@ -108,6 +111,8 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
               ))}
             </div>
           </section>
+
+          <PriceInsights data={insights} />
 
           {/* description */}
           {listing.description && (

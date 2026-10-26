@@ -134,9 +134,16 @@ a one-time "use your location" that auto-filters to nearby.
   `POST /api/v1/listings/{id}/rating`, aggregate shown on the detail page ("No ratings yet" when empty),
   and a star widget offered right after the enquiry (post-interaction gate).
 
-### Phase 5 — Indicative price insights
-- A "Price insights" card on the detail page: locality median ₹/unit, district comparison, a small
-  trend chart — all clearly labelled **indicative**. Backed by a cached aggregates job.
+### Phase 5 — Indicative price insights  ✅ **built 2026-10-26**
+- A "Price insights" card on the detail page (`PriceInsights` + `insights/service.ts`): **median ₹/sq ft**
+  with a 25–75% range bar and where *this* listing sits, computed live from our own published listings
+  (same property type; district → state fallback; min sample of 3). Clearly labelled **Indicative —
+  based on OROVA listings, not a valuation**, with an honest "not enough data yet" state.
+- Deliberately simpler than the original sketch: **no trend chart and no cached aggregates job** — we have
+  too few dated listings for an honest trend, and live computation is cheap at this scale. Revisit a
+  monthly ₹/sq-ft trend + a cached `Listing.aggregates` job once volume supports it.
+- ₹/sq ft needs a TOTAL price + a convertible area, so KATHA/BIGHA and PER_UNIT listings are excluded
+  from the sample (and can't be positioned); the card still shows the locality median to them.
 
 ### Phase 6 — AI listing intake (chat-to-listing)
 - The assistant guides an owner through creating a listing conversationally, filling the
