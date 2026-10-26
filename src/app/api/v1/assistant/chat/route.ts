@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { fail, newRequestId, ok, toErrorResponse } from "@/lib/http";
+import { getCurrentUser } from "@/server/auth/current-user";
 import { runAssistant, type ChatTurn } from "@/server/ai/assistant";
 
 export const runtime = "nodejs";
@@ -34,7 +35,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const result = await runAssistant(turns);
+    const user = await getCurrentUser();
+    const result = await runAssistant(turns, user);
 
     if (result.status === "unavailable") {
       return fail(

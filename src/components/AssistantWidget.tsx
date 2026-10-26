@@ -20,7 +20,7 @@ type Msg = { role: "user" | "assistant"; content: string; listings?: AssistantLi
 
 const SUGGESTIONS = [
   "Plots in Karnataka under ₹50 lakh",
-  "How do I list my property?",
+  "Help me list my property",
   "How does OROVA work?",
 ];
 

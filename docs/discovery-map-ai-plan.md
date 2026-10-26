@@ -145,9 +145,16 @@ a one-time "use your location" that auto-filters to nearby.
 - ₹/sq ft needs a TOTAL price + a convertible area, so KATHA/BIGHA and PER_UNIT listings are excluded
   from the sample (and can't be positioned); the card still shows the locality median to them.
 
-### Phase 6 — AI listing intake (chat-to-listing)
-- The assistant guides an owner through creating a listing conversationally, filling the
-  `createListingSchema` and producing a **DRAFT** (human still reviews). PRD Phase 3.
+### Phase 6 — AI listing intake (chat-to-listing)  ✅ **built 2026-10-26**
+- The assistant gains a `draft_listing` tool, offered **only to a signed-in user with a submitter role**
+  (the chat route now resolves `getCurrentUser()` and passes it in; guests/ineligible users get a
+  "sign in and use List property" nudge instead).
+- It collects the details conversationally, requires **two explicit confirmations** (authority +
+  contact consent) before acting, forward-geocodes the locality (Nominatim, pinPrecision `APPROXIMATE`),
+  validates against `createListingSchema`, and calls `createDraft` → produces a **DRAFT only**. Human
+  review + publish is unchanged; the owner adds photos / exact pin / submits from the Dashboard.
+- Never auto-publishes, never invents details, never affirms the legal declarations itself — it sets
+  them true only on the owner's explicit yes in chat (same meaning as the wizard checkboxes).
 
 ---
 
