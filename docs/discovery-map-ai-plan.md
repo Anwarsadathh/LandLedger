@@ -123,11 +123,16 @@ a one-time "use your location" that auto-filters to nearby.
   caps replies/day as a cost guard — set a number before public launch.
 - *Non-streaming for v1* (replies are short, `max_tokens` 2048); revisit streaming if answers grow.
 
-### Phase 4 — Property detail upgrades
-- **Satellite map** block (Esri imagery) with the listing pin + optional **boundary polygon**;
-  "Get directions" (opens Maps), "Satellite/Standard" toggle.
-- **Owner contact actions:** Call / WhatsApp / Share — privacy-aware per §8 decision (enquiry-gated).
-- **Owner rating** (display + "rate the owner" after an interaction).
+### Phase 4 — Property detail upgrades  ✅ **built 2026-10-25**
+- **Satellite map** (`ListingLocationMap`): Esri World Imagery default + OSM "Map" toggle, listing pin,
+  and a **Get directions** button (opens Google Maps). Replaces the old Google Maps iframe. (Boundary
+  polygon deferred — the listing model has no boundary data yet.)
+- **Owner contact actions** (`OwnerContactActions`): Call / WhatsApp / Share, revealed **only after a
+  consented enquiry** (spec §8). The enquiry API now returns `contact {name, phone}`; the public
+  listing API still never exposes owner contact.
+- **Owner rating:** `Rating` model (aggregated per owner = `createdById`, one rating per rater phone),
+  `POST /api/v1/listings/{id}/rating`, aggregate shown on the detail page ("No ratings yet" when empty),
+  and a star widget offered right after the enquiry (post-interaction gate).
 
 ### Phase 5 — Indicative price insights
 - A "Price insights" card on the detail page: locality median ₹/unit, district comparison, a small

@@ -20,6 +20,13 @@ export async function createEnquiry(listingId: string, input: CreateEnquiryInput
   await connectToDatabase();
   const dedupeKey = `${listingId}:${normalizePhone(input.phone)}`;
 
+  // Enquiry-gated owner contact (spec §8): the owner's details are revealed to
+  // the enquirer only once they submit a consented enquiry. Safe here — not in
+  // the public listing API.
+  const contact = listing.ownerContact?.phone
+    ? { name: listing.ownerContact.name ?? null, phone: listing.ownerContact.phone }
+    : null;
+
   // Duplicate handling (spec §16): do not silently create a second identical
   // lead for the same phone + listing. Return the existing one instead.
   const existing = await Enquiry.findOne({ dedupeKey });
@@ -32,7 +39,7 @@ export async function createEnquiry(listingId: string, input: CreateEnquiryInput
       entityId: String(existing._id),
       metadata: { listingId },
     });
-    return { id: String(existing._id), status: existing.status, duplicate: true };
+    return { id: String(existing._id), status: existing.status, duplicate: true, contact };
   }
 
   const doc = await Enquiry.create({
@@ -56,5 +63,5 @@ export async function createEnquiry(listingId: string, input: CreateEnquiryInput
     metadata: { listingId, source: doc.source },
   });
 
-  return { id: String(doc._id), status: doc.status, duplicate: false };
+  return { id: String(doc._id), status: doc.status, duplicate: false, contact };
 }

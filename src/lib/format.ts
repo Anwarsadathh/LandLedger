@@ -47,6 +47,23 @@ export const LISTING_TYPE_LABELS: Record<string, string> = {
   PROJECT_INVENTORY: "Project inventory",
 };
 
+// Content language (owner-typed, never translated). Labels shown in the native
+// script so an owner recognises their own language; BCP-47 tags set `lang=` on
+// the rendered title/description for correct font shaping and accessibility.
+export const CONTENT_LANGUAGE_LABELS: Record<string, string> = {
+  EN: "English",
+  HI: "हिन्दी",
+  KN: "ಕನ್ನಡ",
+  ML: "മലയാളം",
+};
+
+export const CONTENT_LANGUAGE_BCP47: Record<string, string> = {
+  EN: "en",
+  HI: "hi",
+  KN: "kn",
+  ML: "ml",
+};
+
 export const STATUS_LABELS: Record<string, string> = {
   DRAFT: "Draft",
   SUBMITTED: "Submitted for review",

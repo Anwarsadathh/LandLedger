@@ -7,6 +7,7 @@ type Media = { type: string; url: string };
 export function ListingGallery({
   media,
   title,
+  titleLang,
   subtypeLabel,
   transactionLabel,
   priceLabel,
@@ -14,6 +15,7 @@ export function ListingGallery({
 }: {
   media: Media[];
   title: string;
+  titleLang?: string;
   subtypeLabel: string;
   transactionLabel: string;
   priceLabel: string;
@@ -74,7 +76,7 @@ export function ListingGallery({
               <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[var(--foreground)]">{subtypeLabel}</span>
               <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">{transactionLabel}</span>
             </div>
-            <h1 className="mt-3 text-2xl font-extrabold tracking-tight drop-shadow sm:text-3xl">{title}</h1>
+            <h1 lang={titleLang} className="mt-3 text-2xl font-extrabold tracking-tight drop-shadow sm:text-3xl">{title}</h1>
             <p className="mt-1 flex items-center gap-1.5 text-sm text-white/85">
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11Z" />

@@ -2,9 +2,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { ListingGallery } from "@/components/ListingGallery";
+import { ListingLocationMap } from "@/components/ListingLocationMap";
 import { getPublicListingBySlug } from "@/server/modules/listings/service";
+import { getOwnerRatingForSlug } from "@/server/modules/ratings/service";
 import { ApiError } from "@/lib/http";
-import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
+import {
+  CONTENT_LANGUAGE_BCP47,
+  CONTENT_LANGUAGE_LABELS,
+  LISTING_TYPE_LABELS,
+  formatArea,
+  formatPrice,
+  stateLabel,
+} from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -19,22 +28,27 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
     throw err;
   }
 
+  const rating = await getOwnerRatingForSlug(slug);
+
   const loc = listing.location;
   const subtypeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
   const transactionLabel = listing.transactionType === "SALE" ? "For sale" : "For lease";
+  const langLabel = CONTENT_LANGUAGE_LABELS[listing.contentLanguage] ?? "English";
+  const langTag = CONTENT_LANGUAGE_BCP47[listing.contentLanguage] ?? "en";
+  const isVernacular = listing.contentLanguage !== "EN";
   const locationLabel = [loc.locality, loc.subDistrict, loc.district, stateLabel(loc.state)]
     .filter(Boolean)
     .join(", ");
   const publishedLabel = listing.publishedAt
     ? new Date(listing.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
     : null;
-  const mapSrc = `https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&z=15&output=embed`;
 
   const highlights = [
     { label: "Price", value: formatPrice(listing.price) },
     { label: "Area", value: formatArea(listing.area) },
     listing.area.normalizedSqFt ? { label: "Built-up", value: `${listing.area.normalizedSqFt.toLocaleString("en-IN")} sq ft` } : null,
     { label: "Transaction", value: transactionLabel },
+    { label: "Listed in", value: langLabel },
     listing.features?.facing && listing.features.facing !== "UNKNOWN"
       ? { label: "Facing", value: listing.features.facing.replace(/_/g, " ").toLowerCase() }
       : null,
@@ -57,11 +71,30 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
           <ListingGallery
             media={listing.media}
             title={listing.title}
+            titleLang={langTag}
             subtypeLabel={subtypeLabel}
             transactionLabel={transactionLabel}
             priceLabel={formatPrice(listing.price)}
             locationLabel={locationLabel}
           />
+
+          {/* Title shows in the photo overlay; when there are no photos, surface it here.
+              Either way, make the listing's language unmistakable. */}
+          <div className="flex flex-wrap items-center gap-3">
+            {listing.media.length === 0 && (
+              <h1 lang={langTag} className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+                {listing.title}
+              </h1>
+            )}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--accent)]" fill="none" stroke="currentColor" strokeWidth={1.8}>
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" strokeLinecap="round" />
+              </svg>
+              <span lang={langTag}>{langLabel}</span>
+              {isVernacular && <span className="font-normal text-[var(--muted)]">· shown as written, not translated</span>}
+            </span>
+          </div>
 
           {/* highlights */}
           <section>
@@ -80,25 +113,14 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
           {listing.description && (
             <section>
               <h2 className="mb-2 text-lg font-bold tracking-tight">Description</h2>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]/90">{listing.description}</p>
+              <p lang={langTag} className="whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]/90">{listing.description}</p>
             </section>
           )}
 
           {/* map */}
           <section>
             <h2 className="mb-3 text-lg font-bold tracking-tight">Location</h2>
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)]">
-              <iframe
-                title="Map"
-                src={mapSrc}
-                className="h-64 w-full"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-            <p className="mt-2 text-xs text-[var(--muted)]">
-              Pin precision: {loc.pinPrecision.replace(/_/g, " ").toLowerCase()} · {loc.latitude.toFixed(5)}, {loc.longitude.toFixed(5)}
-            </p>
+            <ListingLocationMap latitude={loc.latitude} longitude={loc.longitude} pinPrecision={loc.pinPrecision} />
           </section>
 
           {/* honesty note */}
@@ -141,9 +163,41 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
             </p>
           </div>
 
+          {/* owner rating */}
+          <div className="card p-5">
+            <p className="text-sm font-semibold">Owner rating</p>
+            {rating.average != null ? (
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <svg
+                      key={n}
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill={n <= Math.round(rating.average as number) ? "#e0813f" : "none"}
+                      stroke="#e0813f"
+                      strokeWidth={1.5}
+                      strokeLinejoin="round"
+                    >
+                      <path d="m12 2 3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-sm font-semibold">{rating.average.toFixed(1)}</span>
+                <span className="text-xs text-[var(--muted)]">
+                  ({rating.count} rating{rating.count === 1 ? "" : "s"})
+                </span>
+              </div>
+            ) : (
+              <p className="mt-1.5 text-xs text-[var(--muted)]">
+                No ratings yet. Send an enquiry — you can rate the owner afterwards.
+              </p>
+            )}
+          </div>
+
           {/* enquiry */}
           <div id="enquire" className="scroll-mt-20">
-            <EnquiryForm listingId={listing.id} />
+            <EnquiryForm listingId={listing.id} listingTitle={listing.title} />
           </div>
         </div>
       </div>

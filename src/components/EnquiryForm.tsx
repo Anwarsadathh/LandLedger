@@ -2,20 +2,27 @@
 
 import { useState } from "react";
 import { CONSENT_NOTICE_VERSION } from "@/lib/consent";
+import { OwnerContactActions } from "@/components/OwnerContactActions";
 
-export function EnquiryForm({ listingId }: { listingId: string }) {
+type Contact = { name: string | null; phone: string };
+
+export function EnquiryForm({ listingId, listingTitle }: { listingId: string; listingTitle: string }) {
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [note, setNote] = useState<string | null>(null);
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [raterPhone, setRaterPhone] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setState("sending");
     setNote(null);
     const f = new FormData(e.currentTarget);
+    const phone = (f.get("phone") as string)?.trim();
+    setRaterPhone(phone);
 
     const payload = {
       name: (f.get("name") as string)?.trim(),
-      phone: (f.get("phone") as string)?.trim(),
+      phone,
       email: (f.get("email") as string)?.trim() || undefined,
       message: (f.get("message") as string)?.trim() || undefined,
       consent: { accepted: f.get("consent") === "on", noticeVersion: CONSENT_NOTICE_VERSION },
@@ -35,6 +42,7 @@ export function EnquiryForm({ listingId }: { listingId: string }) {
         return;
       }
       setState("done");
+      setContact(json.data.contact ?? null);
       setNote(
         json.data.duplicate
           ? "We already have your enquiry for this listing — the team will be in touch."
@@ -47,6 +55,16 @@ export function EnquiryForm({ listingId }: { listingId: string }) {
   }
 
   if (state === "done") {
+    if (contact) {
+      return (
+        <OwnerContactActions
+          listingId={listingId}
+          listingTitle={listingTitle}
+          contact={contact}
+          raterPhone={raterPhone}
+        />
+      );
+    }
     return (
       <div className="rounded-xl border border-green-600/40 bg-green-600/10 p-4 text-sm">{note}</div>
     );

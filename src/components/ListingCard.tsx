@@ -1,10 +1,19 @@
 import Link from "next/link";
 import type { PublicListing } from "@/server/modules/listings/dto";
-import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
+import {
+  CONTENT_LANGUAGE_BCP47,
+  CONTENT_LANGUAGE_LABELS,
+  LISTING_TYPE_LABELS,
+  formatArea,
+  formatPrice,
+  stateLabel,
+} from "@/lib/format";
 
 export function ListingCard({ listing }: { listing: PublicListing }) {
   const cover = listing.media[0]?.url;
   const typeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
+  const langTag = CONTENT_LANGUAGE_BCP47[listing.contentLanguage] ?? "en";
+  const isVernacular = listing.contentLanguage !== "EN";
 
   return (
     <Link
@@ -36,9 +45,19 @@ export function ListingCard({ listing }: { listing: PublicListing }) {
 
       <div className="flex flex-1 flex-col gap-2.5 p-4">
         <div>
-          <h3 className="line-clamp-1 font-semibold tracking-tight group-hover:text-[var(--accent)]">
-            {listing.title}
-          </h3>
+          <div className="flex items-center gap-1.5">
+            <h3 lang={langTag} className="line-clamp-1 font-semibold tracking-tight group-hover:text-[var(--accent)]">
+              {listing.title}
+            </h3>
+            {isVernacular && (
+              <span
+                lang={langTag}
+                className="shrink-0 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--accent)]"
+              >
+                {CONTENT_LANGUAGE_LABELS[listing.contentLanguage]}
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 flex items-center gap-1 text-sm text-[var(--muted)]">
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11Z" />
