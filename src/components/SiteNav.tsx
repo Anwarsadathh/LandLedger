@@ -4,22 +4,25 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "./SignOutButton";
+import { useT } from "@/components/i18n/LanguageProvider";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
 export type NavUser = { name: string; isModerator: boolean } | null;
 
 export function SiteNav({ user }: { user: NavUser }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const t = useT();
   const close = () => setOpen(false);
 
   const items = [
-    { href: "/", label: "Marketplace", show: true },
-    { href: "/map", label: "Map", show: true },
-    { href: "/?type=LAND_PLOT", label: "Land & Plots", show: true },
-    { href: "/?type=RESIDENTIAL", label: "Homes", show: true },
-    { href: "/?type=COMMERCIAL", label: "Commercial", show: true },
-    { href: "/dashboard", label: "Dashboard", show: !!user },
-    { href: "/admin", label: "Admin", show: !!user?.isModerator },
+    { href: "/", label: t("nav.marketplace"), show: true },
+    { href: "/map", label: t("nav.map"), show: true },
+    { href: "/?type=LAND_PLOT", label: t("nav.landPlots"), show: true },
+    { href: "/?type=RESIDENTIAL", label: t("nav.homes"), show: true },
+    { href: "/?type=COMMERCIAL", label: t("nav.commercial"), show: true },
+    { href: "/dashboard", label: t("nav.dashboard"), show: !!user },
+    { href: "/admin", label: t("nav.admin"), show: !!user?.isModerator },
   ].filter((i) => i.show);
 
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
@@ -45,11 +48,13 @@ export function SiteNav({ user }: { user: NavUser }) {
           href="/listings/new"
           className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-[var(--accent)] transition hover:bg-[var(--accent-soft)]"
         >
-          List property
-          <span className="rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">Free</span>
+          {t("nav.listProperty")}
+          <span className="rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">{t("nav.free")}</span>
         </Link>
 
         <span className="mx-2 h-5 w-px bg-[var(--border)]" />
+
+        <LanguageSwitcher className="mr-1" />
 
         {user ? (
           <div className="flex items-center gap-2.5">
@@ -68,10 +73,10 @@ export function SiteNav({ user }: { user: NavUser }) {
               href="/signin"
               className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
             >
-              Sign in
+              {t("nav.signIn")}
             </Link>
             <Link href="/signup" className="btn-primary px-4 py-2">
-              Sign up
+              {t("nav.signUp")}
             </Link>
           </div>
         )}
@@ -135,20 +140,23 @@ export function SiteNav({ user }: { user: NavUser }) {
                 onClick={close}
                 className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-[var(--accent)] px-3 py-2.5 text-sm font-semibold text-[var(--accent)]"
               >
-                List your property
-                <span className="rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">Free</span>
+                {t("nav.listProperty")}
+                <span className="rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">{t("nav.free")}</span>
               </Link>
 
               <div className="mt-3 border-t border-[var(--border)] pt-3">
+                <div className="mb-3">
+                  <LanguageSwitcher className="w-full [&>select]:w-full" />
+                </div>
                 {user ? (
                   <SignOutButton className="btn-ghost w-full justify-center" />
                 ) : (
                   <div className="flex gap-2">
                     <Link href="/signin" onClick={close} className="btn-ghost flex-1 justify-center">
-                      Sign in
+                      {t("nav.signIn")}
                     </Link>
                     <Link href="/signup" onClick={close} className="btn-primary flex-1 justify-center">
-                      Sign up
+                      {t("nav.signUp")}
                     </Link>
                   </div>
                 )}

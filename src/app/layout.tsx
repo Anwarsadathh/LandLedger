@@ -4,6 +4,8 @@ import "./globals.css";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { MODERATOR_ROLES } from "@/server/auth/roles";
 import { AppChrome } from "@/components/AppChrome";
+import { LanguageProvider } from "@/components/i18n/LanguageProvider";
+import { getLocale } from "@/lib/i18n/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +26,14 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   const isModerator = user ? MODERATOR_ROLES.includes(user.role) : false;
+  const locale = await getLocale();
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <AppChrome user={user ? { name: user.name, isModerator } : null}>{children}</AppChrome>
+        <LanguageProvider locale={locale}>
+          <AppChrome user={user ? { name: user.name, isModerator } : null}>{children}</AppChrome>
+        </LanguageProvider>
       </body>
     </html>
   );

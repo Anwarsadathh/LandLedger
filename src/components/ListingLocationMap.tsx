@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 type Leaflet = typeof import("leaflet");
 type LMap = import("leaflet").Map;
@@ -43,6 +44,7 @@ export function ListingLocationMap({
   const stdRef = useRef<LTileLayer | null>(null);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState<"satellite" | "standard">("satellite");
+  const t = useT();
 
   const hasCoords = Number.isFinite(latitude) && Number.isFinite(longitude);
 
@@ -114,10 +116,10 @@ export function ListingLocationMap({
         {/* base-layer toggle (above Leaflet panes) */}
         <div className="absolute left-3 top-3 z-[1000] flex overflow-hidden rounded-full border border-[var(--border)] shadow-sm">
           <button type="button" onClick={() => setView("satellite")} className={toggleBtn("satellite")}>
-            Satellite
+            {t("listing.satellite")}
           </button>
           <button type="button" onClick={() => setView("standard")} className={toggleBtn("standard")}>
-            Map
+            {t("listing.mapView")}
           </button>
         </div>
       </div>
@@ -136,7 +138,7 @@ export function ListingLocationMap({
             <path d="M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11Z" />
             <circle cx="12" cy="10" r="2.5" />
           </svg>
-          Get directions
+          {t("listing.getDirections")}
         </a>
       </div>
     </div>

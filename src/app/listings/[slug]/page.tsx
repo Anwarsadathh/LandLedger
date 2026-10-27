@@ -7,6 +7,7 @@ import { PriceInsights } from "@/components/PriceInsights";
 import { getPublicListingBySlug } from "@/server/modules/listings/service";
 import { getOwnerRatingForSlug } from "@/server/modules/ratings/service";
 import { getPriceInsightsForListing } from "@/server/modules/insights/service";
+import { getT } from "@/lib/i18n/server";
 import { ApiError } from "@/lib/http";
 import {
   CONTENT_LANGUAGE_BCP47,
@@ -32,10 +33,11 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
 
   const rating = await getOwnerRatingForSlug(slug);
   const insights = await getPriceInsightsForListing(listing);
+  const t = await getT();
 
   const loc = listing.location;
   const subtypeLabel = listing.assetSubtype ?? LISTING_TYPE_LABELS[listing.listingType] ?? listing.listingType;
-  const transactionLabel = listing.transactionType === "SALE" ? "For sale" : "For lease";
+  const transactionLabel = listing.transactionType === "SALE" ? t("listing.forSale") : t("listing.forLease");
   const langLabel = CONTENT_LANGUAGE_LABELS[listing.contentLanguage] ?? "English";
   const langTag = CONTENT_LANGUAGE_BCP47[listing.contentLanguage] ?? "en";
   const isVernacular = listing.contentLanguage !== "EN";
@@ -47,16 +49,16 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
     : null;
 
   const highlights = [
-    { label: "Price", value: formatPrice(listing.price) },
-    { label: "Area", value: formatArea(listing.area) },
-    listing.area.normalizedSqFt ? { label: "Built-up", value: `${listing.area.normalizedSqFt.toLocaleString("en-IN")} sq ft` } : null,
-    { label: "Transaction", value: transactionLabel },
-    { label: "Listed in", value: langLabel },
+    { label: t("listing.price"), value: formatPrice(listing.price) },
+    { label: t("listing.area"), value: formatArea(listing.area) },
+    listing.area.normalizedSqFt ? { label: t("listing.builtUp"), value: `${listing.area.normalizedSqFt.toLocaleString("en-IN")} sq ft` } : null,
+    { label: t("listing.transaction"), value: transactionLabel },
+    { label: t("listing.listedIn"), value: langLabel },
     listing.features?.facing && listing.features.facing !== "UNKNOWN"
-      ? { label: "Facing", value: listing.features.facing.replace(/_/g, " ").toLowerCase() }
+      ? { label: t("listing.facing"), value: listing.features.facing.replace(/_/g, " ").toLowerCase() }
       : null,
-    listing.features?.roadAccess ? { label: "Road access", value: String(listing.features.roadAccess).toLowerCase() } : null,
-    { label: "Pin precision", value: loc.pinPrecision.replace(/_/g, " ").toLowerCase() },
+    listing.features?.roadAccess ? { label: t("listing.roadAccess"), value: String(listing.features.roadAccess).toLowerCase() } : null,
+    { label: t("listing.pinPrecision"), value: loc.pinPrecision.replace(/_/g, " ").toLowerCase() },
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (
@@ -65,7 +67,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M11 6l-6 6 6 6" />
         </svg>
-        Back to marketplace
+        {t("listing.back")}
       </Link>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -101,7 +103,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
 
           {/* highlights */}
           <section>
-            <h2 className="mb-3 text-lg font-bold tracking-tight">Highlights</h2>
+            <h2 className="mb-3 text-lg font-bold tracking-tight">{t("listing.highlights")}</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {highlights.map((h) => (
                 <div key={h.label} className="card p-4">
@@ -117,14 +119,14 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
           {/* description */}
           {listing.description && (
             <section>
-              <h2 className="mb-2 text-lg font-bold tracking-tight">Description</h2>
+              <h2 className="mb-2 text-lg font-bold tracking-tight">{t("listing.description")}</h2>
               <p lang={langTag} className="whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]/90">{listing.description}</p>
             </section>
           )}
 
           {/* map */}
           <section>
-            <h2 className="mb-3 text-lg font-bold tracking-tight">Location</h2>
+            <h2 className="mb-3 text-lg font-bold tracking-tight">{t("listing.location")}</h2>
             <ListingLocationMap latitude={loc.latitude} longitude={loc.longitude} pinPrecision={loc.pinPrecision} />
           </section>
 
@@ -154,7 +156,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
               </span>
               <div>
                 <p className="flex items-center gap-1.5 font-semibold">
-                  Human-reviewed
+                  {t("listing.humanReviewed")}
                   <svg viewBox="0 0 24 24" className="h-4 w-4 text-[var(--accent)]" fill="currentColor"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z" opacity="0" /><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" /></svg>
                 </p>
                 <p className="text-xs text-[var(--muted)]">
@@ -170,7 +172,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
 
           {/* owner rating */}
           <div className="card p-5">
-            <p className="text-sm font-semibold">Owner rating</p>
+            <p className="text-sm font-semibold">{t("listing.ownerRating")}</p>
             {rating.average != null ? (
               <div className="mt-2 flex items-center gap-2">
                 <div className="flex items-center gap-0.5">
@@ -190,13 +192,11 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                 </div>
                 <span className="text-sm font-semibold">{rating.average.toFixed(1)}</span>
                 <span className="text-xs text-[var(--muted)]">
-                  ({rating.count} rating{rating.count === 1 ? "" : "s"})
+                  ({rating.count} {rating.count === 1 ? t("listing.rating") : t("listing.ratings")})
                 </span>
               </div>
             ) : (
-              <p className="mt-1.5 text-xs text-[var(--muted)]">
-                No ratings yet. Send an enquiry — you can rate the owner afterwards.
-              </p>
+              <p className="mt-1.5 text-xs text-[var(--muted)]">{t("listing.noRatingsYet")}</p>
             )}
           </div>
 
@@ -214,7 +214,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
             <p className="truncate text-base font-extrabold">{formatPrice(listing.price)}</p>
             <p className="truncate text-xs text-[var(--muted)]">{formatArea(listing.area)}</p>
           </div>
-          <a href="#enquire" className="btn-accent px-6 py-3">Enquire now</a>
+          <a href="#enquire" className="btn-accent px-6 py-3">{t("listing.enquireNow")}</a>
         </div>
       </div>
     </div>
