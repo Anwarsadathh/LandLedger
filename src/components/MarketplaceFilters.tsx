@@ -34,6 +34,7 @@ export function MarketplaceFilters({
   const [type, setType] = useState(initial.type ?? "");
   const [priceMin, setPriceMin] = useState(initial.priceMin ?? "");
   const [priceMax, setPriceMax] = useState(initial.priceMax ?? "");
+  const [open, setOpen] = useState(false); // mobile: filters collapsed by default
 
   function apply() {
     const p = new URLSearchParams();
@@ -58,6 +59,7 @@ export function MarketplaceFilters({
   }
 
   const hasFilters = q || state || city || type || priceMin || priceMax;
+  const activeCount = [q, state, city, type, priceMin, priceMax].filter(Boolean).length;
 
   // ---------- compact hero bar ----------
   if (variant === "compact") {
@@ -128,7 +130,31 @@ export function MarketplaceFilters({
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 sm:p-4">
+      {/* mobile toggle — filters are collapsed until tapped */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between md:hidden"
+      >
+        <span className="flex items-center gap-2 text-sm font-medium">
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="7" y1="12" x2="17" y2="12" />
+            <line x1="10" y1="18" x2="14" y2="18" />
+          </svg>
+          {t("filter.filter")}
+          {hasFilters ? (
+            <span className="rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{activeCount}</span>
+          ) : null}
+        </span>
+        <svg viewBox="0 0 24 24" className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      <div className={`${open ? "mt-3 flex" : "hidden"} flex-wrap items-end gap-3 md:mt-0 md:flex`}>
       <Field label={t("filter.labelSearch")}>
         <input
           value={q}
@@ -186,6 +212,7 @@ export function MarketplaceFilters({
           {t("filter.clear")}
         </button>
       )}
+      </div>
     </div>
   );
 }

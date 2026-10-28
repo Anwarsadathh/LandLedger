@@ -148,7 +148,7 @@ export function MapExplorer({ items }: { items: PublicListing[] }) {
               onMouseEnter={() => focusListing(it.id)}
               className={`rounded-2xl transition ${selectedId === it.id ? "ring-2 ring-[var(--accent)]" : ""}`}
             >
-              <ListingCard listing={it} />
+              <ListingCard listing={it} compact />
             </div>
           ))
         )}
