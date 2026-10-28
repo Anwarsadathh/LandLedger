@@ -135,9 +135,9 @@ export function MapExplorer({ items }: { items: PublicListing[] }) {
         style={{ background: "var(--accent-soft)" }}
       />
 
-      <div className="flex max-h-[72vh] flex-col gap-4 overflow-y-auto pr-1">
+      <div className="grid max-h-[72vh] grid-cols-2 gap-3 overflow-y-auto pr-1">
         {items.length === 0 ? (
-          <div className="card border-dashed p-10 text-center text-sm text-[var(--muted)]">
+          <div className="col-span-2 card border-dashed p-10 text-center text-sm text-[var(--muted)]">
             No listings match your filters yet.
           </div>
         ) : (
