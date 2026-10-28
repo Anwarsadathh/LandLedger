@@ -134,6 +134,51 @@ body {
   animation: gradient-pan 6s ease-in-out infinite;
 }
 
+/* ---------- AI assistant launcher (always-on "AI" animation) ---------- */
+@keyframes ai-halo {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+@keyframes ai-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 24px -6px rgba(224, 129, 63, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 10px 30px -4px rgba(224, 129, 63, 0.75),
+      0 0 20px 2px rgba(224, 129, 63, 0.3);
+  }
+}
+@keyframes ai-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+}
+.ai-halo {
+  animation: ai-halo 2.4s ease-out infinite;
+}
+.ai-pulse {
+  animation: ai-pulse 2.6s ease-in-out infinite;
+}
+.ai-twinkle {
+  transform-origin: center;
+  animation: ai-twinkle 1.9s ease-in-out infinite;
+}
+
 /* ---------- property listing CTA ---------- */
 .property-cta {
   background:
@@ -260,7 +305,10 @@ body {
   .property-cta__ripple,
   .property-cta__pin,
   .property-cta__private-card,
-  .property-cta__pulse {
+  .property-cta__pulse,
+  .ai-halo,
+  .ai-pulse,
+  .ai-twinkle {
     animation: none !important;
   }
   .property-cta__reveal.reveal-in .property-cta__panel,

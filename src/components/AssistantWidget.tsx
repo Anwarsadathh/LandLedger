@@ -83,15 +83,18 @@ export function AssistantWidget() {
     <>
       {/* Launcher */}
       {!open && (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label="Open the OROVA assistant"
-          className="btn-accent fixed bottom-5 right-5 z-50 gap-2 rounded-full py-3 pl-4 pr-5 shadow-lg shadow-black/10"
-        >
-          <SparkIcon />
-          <span className="text-sm font-semibold">Ask OROVA</span>
-        </button>
+        <div className="fixed bottom-5 right-5 z-50">
+          <span aria-hidden className="ai-halo pointer-events-none absolute inset-0 rounded-full bg-[var(--accent)]" />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Open the OROVA assistant"
+            className="btn-accent ai-pulse relative gap-2 rounded-full py-3 pl-4 pr-5"
+          >
+            <SparkIcon className="ai-twinkle" />
+            <span className="text-sm font-semibold">Ask OROVA</span>
+          </button>
+        </div>
       )}
 
       {/* Panel */}
@@ -242,9 +245,9 @@ function ListingChip({ listing, onNavigate }: { listing: AssistantListing; onNav
   );
 }
 
-function SparkIcon() {
+function SparkIcon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+    <svg viewBox="0 0 24 24" className={`h-4 w-4 ${className}`} fill="currentColor" aria-hidden>
       <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z" />
       <path d="M19 14l.9 2.6L22.5 17.5l-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" opacity=".7" />
     </svg>

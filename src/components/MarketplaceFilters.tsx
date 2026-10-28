@@ -6,6 +6,7 @@ import { Combobox } from "@/components/Combobox";
 import { STATE_NAMES, citiesForState } from "@/lib/states-data";
 import { LISTING_TYPES } from "@/server/domain/enums";
 import { LISTING_TYPE_LABELS } from "@/lib/format";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 export type FilterValues = {
   q?: string;
@@ -26,6 +27,7 @@ export function MarketplaceFilters({
   basePath?: string;
 }) {
   const router = useRouter();
+  const t = useT();
   const [q, setQ] = useState(initial.q ?? "");
   const [state, setState] = useState(initial.state ?? "");
   const [city, setCity] = useState(initial.city ?? "");
@@ -72,7 +74,7 @@ export function MarketplaceFilters({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && apply()}
-              placeholder="Search city, locality or title"
+              placeholder={t("filter.searchPlaceholder")}
               className="w-full bg-transparent py-2.5 text-sm text-[var(--foreground)] outline-none"
             />
           </div>
@@ -96,7 +98,7 @@ export function MarketplaceFilters({
           <Combobox
             value={state}
             options={STATE_NAMES}
-            placeholder="Any state"
+            placeholder={t("filter.anyState")}
             onChange={(v) => {
               setState(v);
               setCity("");
@@ -107,19 +109,19 @@ export function MarketplaceFilters({
           <Combobox
             value={city}
             options={citiesForState(state)}
-            placeholder={state ? "Any city" : "State first"}
+            placeholder={state ? t("filter.anyCity") : t("filter.stateFirst")}
             disabled={!state}
             onChange={setCity}
           />
         </div>
         <select value={type} onChange={(e) => setType(e.target.value)} className="input hidden sm:block sm:w-36">
-          <option value="">Any type</option>
-          {LISTING_TYPES.map((t) => (
-            <option key={t} value={t}>{LISTING_TYPE_LABELS[t]}</option>
+          <option value="">{t("filter.anyTypeLong")}</option>
+          {LISTING_TYPES.map((lt) => (
+            <option key={lt} value={lt}>{LISTING_TYPE_LABELS[lt]}</option>
           ))}
         </select>
         <button onClick={apply} className="btn-primary hidden justify-center sm:inline-flex sm:px-7">
-          Search
+          {t("filter.search")}
         </button>
       </div>
     );
@@ -127,21 +129,21 @@ export function MarketplaceFilters({
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
-      <Field label="Search">
+      <Field label={t("filter.labelSearch")}>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && apply()}
-          placeholder="Title or description"
+          placeholder={t("filter.searchShort")}
           className="input w-44"
         />
       </Field>
-      <Field label="State">
+      <Field label={t("filter.labelState")}>
         <div className="w-44">
           <Combobox
             value={state}
             options={STATE_NAMES}
-            placeholder="Any state"
+            placeholder={t("filter.anyState")}
             onChange={(v) => {
               setState(v);
               setCity("");
@@ -149,39 +151,39 @@ export function MarketplaceFilters({
           />
         </div>
       </Field>
-      <Field label="City">
+      <Field label={t("filter.labelCity")}>
         <div className="w-44">
           <Combobox
             value={city}
             options={citiesForState(state)}
-            placeholder={state ? "Any city" : "Pick a state first"}
+            placeholder={state ? t("filter.anyCity") : t("filter.pickStateFirst")}
             disabled={!state}
             onChange={setCity}
           />
         </div>
       </Field>
-      <Field label="Type">
+      <Field label={t("filter.labelType")}>
         <select value={type} onChange={(e) => setType(e.target.value)} className="input w-40">
-          <option value="">Any</option>
-          {LISTING_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {LISTING_TYPE_LABELS[t]}
+          <option value="">{t("filter.anyType")}</option>
+          {LISTING_TYPES.map((lt) => (
+            <option key={lt} value={lt}>
+              {LISTING_TYPE_LABELS[lt]}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Min price (₹)">
+      <Field label={t("filter.minPrice")}>
         <input value={priceMin} onChange={(e) => setPriceMin(e.target.value)} type="number" className="input w-28" />
       </Field>
-      <Field label="Max price (₹)">
+      <Field label={t("filter.maxPrice")}>
         <input value={priceMax} onChange={(e) => setPriceMax(e.target.value)} type="number" className="input w-28" />
       </Field>
       <button onClick={apply} className="btn-primary h-9">
-        Filter
+        {t("filter.filter")}
       </button>
       {hasFilters && (
         <button onClick={clear} className="btn-ghost h-9">
-          Clear
+          {t("filter.clear")}
         </button>
       )}
     </div>

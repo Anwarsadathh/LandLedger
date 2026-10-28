@@ -5,6 +5,7 @@ import { Reveal } from "@/components/Reveal";
 import type { PublicListing } from "@/server/modules/listings/dto";
 import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
 import { searchPublicListings } from "@/server/modules/listings/service";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,7 @@ async function getListings(filters: {
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
+  const t = await getT();
   const hasFilters = !!(sp.state || sp.city || sp.type || sp.q || sp.priceMin || sp.priceMax);
 
   // ---------- Search-results view ----------
@@ -65,9 +67,9 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     return (
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Search results</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("home.searchResults")}</h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            {ok ? `${items.length} listing${items.length === 1 ? "" : "s"} found` : "Couldn’t load listings right now."}
+            {ok ? `${items.length} listing${items.length === 1 ? "" : "s"} found` : t("home.couldntLoad")}
           </p>
         </div>
         <MarketplaceFilters
@@ -75,9 +77,9 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         />
         {items.length === 0 ? (
           <div className="card border-dashed p-12 text-center">
-            <p className="font-medium">No listings match your filters</p>
-            <p className="mx-auto mt-1 max-w-md text-sm text-[var(--muted)]">Try widening your search, or clear the filters.</p>
-            <Link href="/" className="btn-ghost mt-4 inline-flex">Clear filters</Link>
+            <p className="font-medium">{t("home.noMatch")}</p>
+            <p className="mx-auto mt-1 max-w-md text-sm text-[var(--muted)]">{t("home.widen")}</p>
+            <Link href="/" className="btn-ghost mt-4 inline-flex">{t("home.clearFilters")}</Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -114,29 +116,28 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <div className="mx-auto max-w-3xl text-center">
             <span className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-              Land &amp; property across India
+              {t("home.heroBadge")}
             </span>
 
             <h1 className="animate-fade-up mt-6 text-5xl font-extrabold leading-[1.04] tracking-tight sm:text-7xl" style={{ animationDelay: "0.08s" }}>
-              Find a place{" "}
+              {t("home.heroTitle1")}{" "}
               <span className="text-shimmer bg-gradient-to-r from-amber-200 via-[#f0a86a] to-amber-200 bg-clip-text text-transparent">
-                you&apos;ll love
+                {t("home.heroTitle2")}
               </span>
               .
             </h1>
 
             <p className="animate-fade-up mx-auto mt-6 max-w-xl text-lg text-white/75" style={{ animationDelay: "0.16s" }}>
-              Plots, homes and farmland across India — on a marketplace that shows exactly what was
-              checked. No fake “Verified” badges, ever.
+              {t("home.heroSubtitle")}
             </p>
 
             <div className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "0.24s" }}>
               <Link href="/listings/new" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-semibold text-[var(--foreground)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5">
-                List your property
+                {t("home.listYourProperty")}
                 <Arrow />
               </Link>
               <a href="#listings" className="hidden items-center rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:inline-flex">
-                Browse listings
+                {t("home.browseListings")}
               </a>
             </div>
           </div>
@@ -154,7 +155,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <div className="no-scrollbar flex gap-2.5 overflow-x-auto pb-1">
           {CHIPS.map((c) => (
             <Link
-              key={c.label}
+              key={c.labelKey}
               href={c.type ? `/?type=${c.type}` : "#listings"}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
                 c.active
@@ -162,7 +163,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                   : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--foreground)] hover:text-[var(--foreground)]"
               }`}
             >
-              {c.label}
+              {t(c.labelKey)}
             </Link>
           ))}
         </div>
@@ -171,10 +172,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       {/* ===== QUICK TILES ===== */}
       <section className="-mt-12">
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {QUICK_TILES.map((t, i) => (
-            <Reveal key={t.label} delay={i * 70}>
+          {QUICK_TILES.map((tile, i) => (
+            <Reveal key={tile.labelKey} delay={i * 70}>
               <Link
-                href={t.href}
+                href={tile.href}
                 className="group relative flex aspect-[5/4] flex-col justify-end overflow-hidden rounded-2xl bg-[#1b1813] p-4 text-white"
                 style={
                   featured[i]?.media?.[0]?.url
@@ -187,10 +188,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                 }
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur transition group-hover:bg-[var(--accent)]">
-                  {t.icon}
+                  {tile.icon}
                 </span>
-                <span className="mt-3 block font-semibold">{t.label}</span>
-                <span className="text-xs text-white/70">{t.sub}</span>
+                <span className="mt-3 block font-semibold">{t(tile.labelKey)}</span>
+                <span className="text-xs text-white/70">{t(tile.subKey)}</span>
               </Link>
             </Reveal>
           ))}
@@ -208,7 +209,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <>
           {/* ===== POPULAR (overlay card scroll row) ===== */}
           <section id="listings" className="scroll-mt-24">
-            <SectionHead eyebrow="Trending" title="Popular right now" action={<Link href="/?type=LAND_PLOT" className="text-sm font-semibold text-[var(--accent)] hover:underline">See all →</Link>} />
+            <SectionHead eyebrow={t("home.trending")} title={t("home.popular")} action={<Link href="/?type=LAND_PLOT" className="text-sm font-semibold text-[var(--accent)] hover:underline">{t("home.seeAll")}</Link>} />
             <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
               {popular.map((l) => (
                 <div key={l.id} className="w-[220px] shrink-0 snap-start sm:w-[250px]">
@@ -220,7 +221,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
           {/* ===== RECENTLY LISTED (grid) ===== */}
           <section>
-            <SectionHead eyebrow="Marketplace" title="Recently listed" sub="Fresh plots, homes and land from owners and brokers." action={<Link href="/?type=RESIDENTIAL" className="text-sm font-semibold text-[var(--accent)] hover:underline">View all →</Link>} />
+            <SectionHead eyebrow={t("nav.marketplace")} title={t("home.recently")} sub={t("home.recentlySub")} action={<Link href="/?type=RESIDENTIAL" className="text-sm font-semibold text-[var(--accent)] hover:underline">{t("home.viewAll")}</Link>} />
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {recent.map((l, i) => (
                 <Reveal key={l.id} delay={(i % 3) * 90}>
@@ -233,7 +234,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           {/* ===== MORE (list rows) ===== */}
           {more.length > 0 && (
             <section>
-              <SectionHead eyebrow="Keep exploring" title="More across India" />
+              <SectionHead eyebrow={t("home.keepExploring")} title={t("home.moreAcross")} />
               <div className="flex flex-col gap-3">
                 {more.map((l) => (
                   <ListRow key={l.id} listing={l} />
@@ -246,7 +247,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
       {/* ===== HOW IT WORKS ===== */}
       <section>
-        <SectionHead eyebrow="For owners & brokers" title="List in minutes" sub="From your phone to the marketplace in three steps." />
+        <SectionHead eyebrow={t("home.forOwners")} title={t("home.listInMinutes")} sub="From your phone to the marketplace in three steps." />
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {STEPS.map((s, i) => (
             <Reveal key={s.title} delay={i * 110}>
@@ -262,7 +263,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
       {/* ===== WHY ===== */}
       <section>
-        <SectionHead eyebrow="Why OROVA" title="Built on honesty, not hype" sub="The things that matter when money and land are on the line." />
+        <SectionHead eyebrow={t("home.whyOrova")} title="Built on honesty, not hype" sub="The things that matter when money and land are on the line." />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 90}>
@@ -441,18 +442,18 @@ function ListRow({ listing }: { listing: PublicListing }) {
 /* ---------------- content ---------------- */
 
 const CHIPS = [
-  { label: "All", type: "", active: true },
-  { label: "Land & Plots", type: "LAND_PLOT", active: false },
-  { label: "Residential", type: "RESIDENTIAL", active: false },
-  { label: "Commercial", type: "COMMERCIAL", active: false },
-  { label: "Agricultural", type: "AGRICULTURAL", active: false },
+  { labelKey: "home.all", type: "", active: true },
+  { labelKey: "nav.landPlots", type: "LAND_PLOT", active: false },
+  { labelKey: "nav.homes", type: "RESIDENTIAL", active: false },
+  { labelKey: "nav.commercial", type: "COMMERCIAL", active: false },
+  { labelKey: "home.agricultural", type: "AGRICULTURAL", active: false },
 ];
 
 const QUICK_TILES = [
-  { label: "Land & Plots", sub: "Residential & commercial plots", href: "/?type=LAND_PLOT", icon: <IconMap /> },
-  { label: "Ready homes", sub: "Flats, villas & floors", href: "/?type=RESIDENTIAL", icon: <IconHome /> },
-  { label: "Commercial", sub: "Offices, shops, warehouses", href: "/?type=COMMERCIAL", icon: <IconBuilding /> },
-  { label: "Farmland", sub: "Agricultural & orchards", href: "/?type=AGRICULTURAL", icon: <IconSprout /> },
+  { labelKey: "nav.landPlots", subKey: "home.tile.landSub", href: "/?type=LAND_PLOT", icon: <IconMap /> },
+  { labelKey: "home.tile.homes", subKey: "home.tile.homesSub", href: "/?type=RESIDENTIAL", icon: <IconHome /> },
+  { labelKey: "nav.commercial", subKey: "home.tile.commercialSub", href: "/?type=COMMERCIAL", icon: <IconBuilding /> },
+  { labelKey: "home.tile.farmland", subKey: "home.tile.farmlandSub", href: "/?type=AGRICULTURAL", icon: <IconSprout /> },
 ];
 
 const STEPS = [

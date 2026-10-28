@@ -28,17 +28,23 @@ export function SiteNav({ user }: { user: NavUser }) {
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   const linkClass = (href: string) =>
-    `rounded-full px-3.5 py-2 text-sm font-medium transition ${
+    `whitespace-nowrap shrink-0 rounded-full px-3 py-2 text-sm font-medium transition ${
       isActive(href)
         ? "bg-[var(--foreground)] text-white"
         : "text-[var(--muted)] hover:bg-[var(--accent-soft)] hover:text-[var(--foreground)]"
     }`;
 
+  // The top bar keeps only the essentials; the type-filter links stay in the
+  // mobile menu, the footer and the hero chips, so the bar doesn't crowd/wrap
+  // (especially in longer scripts like Hindi/Kannada/Malayalam).
+  const TYPE_HREFS = ["/?type=LAND_PLOT", "/?type=RESIDENTIAL", "/?type=COMMERCIAL"];
+  const desktopItems = items.filter((i) => !TYPE_HREFS.includes(i.href));
+
   return (
     <>
       {/* ---------- Desktop ---------- */}
-      <nav className="hidden items-center gap-1 md:flex">
-        {items.map((i) => (
+      <nav className="hidden items-center gap-0.5 lg:flex">
+        {desktopItems.map((i) => (
           <Link key={i.href} href={i.href} className={linkClass(i.href)}>
             {i.label}
           </Link>
@@ -46,36 +52,36 @@ export function SiteNav({ user }: { user: NavUser }) {
 
         <Link
           href="/listings/new"
-          className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-[var(--accent)] px-3.5 py-2 text-sm font-semibold text-[var(--accent)] transition hover:bg-[var(--accent-soft)]"
+          className="ml-1 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--accent)] px-3 py-2 text-sm font-semibold text-[var(--accent)] transition hover:bg-[var(--accent-soft)]"
         >
           {t("nav.listProperty")}
           <span className="rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">{t("nav.free")}</span>
         </Link>
 
-        <span className="mx-2 h-5 w-px bg-[var(--border)]" />
+        <span className="mx-1.5 h-5 w-px shrink-0 bg-[var(--border)]" />
 
-        <LanguageSwitcher className="mr-1" />
+        <LanguageSwitcher className="shrink-0" />
 
         {user ? (
-          <div className="flex items-center gap-2.5">
+          <div className="flex shrink-0 items-center gap-1.5">
             <Link
               href="/profile"
               className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-[var(--accent-soft)]"
             >
               <Avatar name={user.name} />
-              <span className="text-sm font-medium">{user.name.split(" ")[0]}</span>
+              <span className="whitespace-nowrap text-sm font-medium">{user.name.split(" ")[0]}</span>
             </Link>
-            <SignOutButton className="btn-ghost px-3 py-1.5" />
+            <SignOutButton className="btn-ghost whitespace-nowrap px-3 py-1.5" />
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/signin"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
+              className="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
             >
               {t("nav.signIn")}
             </Link>
-            <Link href="/signup" className="btn-primary px-4 py-2">
+            <Link href="/signup" className="btn-primary whitespace-nowrap px-4 py-2">
               {t("nav.signUp")}
             </Link>
           </div>
@@ -88,7 +94,7 @@ export function SiteNav({ user }: { user: NavUser }) {
         aria-label="Menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--foreground)] transition hover:bg-[var(--background)] md:hidden"
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--foreground)] transition hover:bg-[var(--background)] lg:hidden"
       >
         {open ? <IconX /> : <IconMenu />}
       </button>
@@ -100,9 +106,9 @@ export function SiteNav({ user }: { user: NavUser }) {
             aria-hidden
             tabIndex={-1}
             onClick={close}
-            className="fixed inset-0 top-[57px] z-30 cursor-default bg-black/20 md:hidden"
+            className="fixed inset-0 top-[57px] z-30 cursor-default bg-black/20 lg:hidden"
           />
-          <div className="absolute inset-x-0 top-full z-40 border-b border-[var(--border)] bg-[var(--card)] shadow-xl md:hidden">
+          <div className="absolute inset-x-0 top-full z-40 border-b border-[var(--border)] bg-[var(--card)] shadow-xl lg:hidden">
             <div className="mx-auto max-w-6xl px-4 py-3">
               {user && (
                 <Link

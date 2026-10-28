@@ -17,7 +17,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
         aria-label={t("nav.language")}
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
-        className="cursor-pointer rounded-full border border-[var(--border)] bg-[var(--card)] py-1.5 pl-8 pr-7 text-sm font-medium text-[var(--foreground)] outline-none transition hover:border-[var(--foreground)] focus:border-[var(--accent)]"
+        className="cursor-pointer appearance-none rounded-full border border-[var(--border)] bg-[var(--card)] py-1.5 pl-8 pr-7 text-sm font-medium text-[var(--foreground)] outline-none transition hover:border-[var(--foreground)] focus:border-[var(--accent)]"
       >
         {LOCALES.map((l) => (
           <option key={l} value={l}>

@@ -16,6 +16,7 @@ import {
   type Category,
 } from "@/lib/listing-options";
 import type { ListingType } from "@/server/domain/enums";
+import { useT } from "@/components/i18n/LanguageProvider";
 
 type Errors = Record<string, string>;
 
@@ -93,20 +94,14 @@ const INITIAL: Form = {
   consent: false,
 };
 
-const LANGUAGE_OPTIONS = [
-  { value: "EN" as const, label: "English" },
-  { value: "HI" as const, label: "हिन्दी" },
-  { value: "KN" as const, label: "ಕನ್ನಡ" },
-  { value: "ML" as const, label: "മലയാളം" },
-];
 const LANG_CODE: Record<Form["contentLanguage"], string> = { EN: "en", HI: "hi", KN: "kn", ML: "ml" };
 
 const STEPS = [
-  { key: "basic", title: "Basic Details" },
-  { key: "location", title: "Location Details" },
-  { key: "profile", title: "Property Profile" },
-  { key: "media", title: "Photos & Media" },
-  { key: "contact", title: "Contact & Confirm" },
+  { key: "basic", titleKey: "wizard.step.basic" },
+  { key: "location", titleKey: "wizard.step.location" },
+  { key: "profile", titleKey: "wizard.step.profile" },
+  { key: "media", titleKey: "wizard.step.media" },
+  { key: "contact", titleKey: "wizard.step.contact" },
 ] as const;
 
 const isNum = (v: string) => v.trim() !== "" && !Number.isNaN(Number(v));
@@ -163,6 +158,7 @@ const COMPLETENESS_FIELDS = (f: Form): boolean[] => [
 
 export default function NewListingWizard() {
   const router = useRouter();
+  const t = useT();
   const [form, setForm] = useState<Form>(INITIAL);
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Errors>({});
@@ -306,9 +302,9 @@ export default function NewListingWizard() {
                     className={`pb-6 text-left ${i <= step ? "cursor-pointer" : "cursor-default"}`}
                   >
                     <div className={`text-sm font-medium ${state === "upcoming" ? "text-[var(--muted)]" : ""}`}>
-                      {s.title}
+                      {t(s.titleKey)}
                     </div>
-                    <div className="text-xs text-[var(--muted)]">Step {i + 1}</div>
+                    <div className="text-xs text-[var(--muted)]">{t("wizard.stepWord")} {i + 1}</div>
                   </button>
                 </li>
               );
@@ -318,8 +314,8 @@ export default function NewListingWizard() {
         <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
           <Ring value={completeness} />
           <div>
-            <p className="text-sm font-medium">Listing completeness</p>
-            <p className="text-xs text-[var(--muted)]">More detail means better visibility.</p>
+            <p className="text-sm font-medium">{t("wizard.completeness")}</p>
+            <p className="text-xs text-[var(--muted)]">{t("wizard.completenessSub")}</p>
           </div>
         </div>
       </aside>
@@ -329,9 +325,9 @@ export default function NewListingWizard() {
         {/* Compact stepper (mobile) */}
         <div className="mb-4 md:hidden">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{STEPS[step].title}</span>
+            <span className="text-sm font-medium">{t(STEPS[step].titleKey)}</span>
             <span className="text-xs text-[var(--muted)]">
-              Step {step + 1} of {STEPS.length} · {completeness}%
+              {t("wizard.stepWord")} {step + 1} {t("wizard.of")} {STEPS.length} · {completeness}%
             </span>
           </div>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
@@ -347,14 +343,14 @@ export default function NewListingWizard() {
             onClick={goBack}
             className="mb-3 inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
           >
-            <BackArrow /> Back
+            <BackArrow /> {t("wizard.back")}
           </button>
         ) : (
           <Link
             href="/dashboard"
             className="mb-3 inline-flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
           >
-            <BackArrow /> Cancel
+            <BackArrow /> {t("wizard.cancel")}
           </Link>
         )}
 
@@ -369,11 +365,11 @@ export default function NewListingWizard() {
         <div className="mt-8">
           {step < STEPS.length - 1 ? (
             <button onClick={goNext} className="btn-primary w-full px-8 py-2.5 md:w-auto">
-              Continue
+              {t("wizard.continue")}
             </button>
           ) : (
             <button onClick={submit} disabled={submitting} className="btn-primary w-full px-8 py-2.5 md:w-auto">
-              {submitting ? "Submitting…" : "Submit for review"}
+              {submitting ? t("wizard.submitting") : t("wizard.submit")}
             </button>
           )}
         </div>
@@ -387,21 +383,22 @@ export default function NewListingWizard() {
 type StepProps = { form: Form; set: (p: Partial<Form>) => void; errors: Errors };
 
 function StepBasic({ form, set, errors, name }: StepProps & { name: string | null }) {
+  const t = useT();
   const subtypes = form.category ? SUBTYPES[form.category] : [];
   return (
     <div>
       <Heading
-        title={name ? `Welcome back ${name.split(" ")[0]}, fill out the basics` : "Fill out the basics"}
-        sub="Tell us what you're listing and what kind of property it is."
+        title={name ? t("wizard.basic.titleNamed").replace("{name}", name.split(" ")[0]) : t("wizard.basic.title")}
+        sub={t("wizard.basic.sub")}
       />
-      <FieldBlock label="I'm looking to" error={errors.transactionType}>
+      <FieldBlock label={t("wizard.lookingTo")} error={errors.transactionType}>
         <ChipRow>
-          <Chip selected={form.transactionType === "SALE"} onClick={() => set({ transactionType: "SALE" })}>Sell</Chip>
-          <Chip selected={form.transactionType === "LEASE"} onClick={() => set({ transactionType: "LEASE" })}>Rent / Lease</Chip>
+          <Chip selected={form.transactionType === "SALE"} onClick={() => set({ transactionType: "SALE" })}>{t("wizard.sell")}</Chip>
+          <Chip selected={form.transactionType === "LEASE"} onClick={() => set({ transactionType: "LEASE" })}>{t("wizard.rentLease")}</Chip>
         </ChipRow>
       </FieldBlock>
 
-      <FieldBlock label="What kind of property do you have?" error={errors.category}>
+      <FieldBlock label={t("wizard.propertyKind")} error={errors.category}>
         <ChipRow>
           {CATEGORIES.map((c) => (
             <Chip
@@ -416,7 +413,7 @@ function StepBasic({ form, set, errors, name }: StepProps & { name: string | nul
       </FieldBlock>
 
       {form.category && (
-        <FieldBlock label="Property type" error={errors.assetSubtype}>
+        <FieldBlock label={t("wizard.propertyType")} error={errors.assetSubtype}>
           <ChipRow>
             {subtypes.map((s) => (
               <Chip
@@ -435,11 +432,12 @@ function StepBasic({ form, set, errors, name }: StepProps & { name: string | nul
 }
 
 function StepLocation({ form, set, errors }: StepProps) {
+  const t = useT();
   return (
     <div>
-      <Heading title="Where is your property located?" sub="An accurate location helps you connect with the right buyers." />
+      <Heading title={t("wizard.location.title")} sub={t("wizard.location.sub")} />
       <div className="flex max-w-xl flex-col gap-4">
-        <Field label="Pin location" error={errors.latitude || errors.longitude}>
+        <Field label={t("wizard.pinLocation")} error={errors.latitude || errors.longitude}>
           <LocationPicker
             latitude={form.latitude}
             longitude={form.longitude}
@@ -453,30 +451,30 @@ function StepLocation({ form, set, errors }: StepProps) {
             }
           />
         </Field>
-        <Field label="State" error={errors.state}>
+        <Field label={t("wizard.state")} error={errors.state}>
           <Combobox
             value={form.state}
             options={STATE_NAMES}
-            placeholder="Search your state…"
+            placeholder={t("wizard.searchState")}
             onChange={(v) => set({ state: v, district: "" })}
           />
         </Field>
-        <Field label="City / District" error={errors.district}>
+        <Field label={t("wizard.cityDistrict")} error={errors.district}>
           <Combobox
             value={form.district}
             options={citiesForState(form.state)}
-            placeholder={form.state ? "Search your city…" : "Pick a state first"}
+            placeholder={form.state ? t("wizard.searchCity") : t("wizard.pickStateFirst")}
             disabled={!form.state}
             onChange={(v) => set({ district: v })}
           />
         </Field>
-        <Field label="Circle / Tehsil / Taluk (optional)">
+        <Field label={t("wizard.circle")}>
           <input value={form.subDistrict} onChange={(e) => set({ subDistrict: e.target.value })} className="input w-full" />
         </Field>
-        <Field label="Locality / Village / Mouza (optional)">
+        <Field label={t("wizard.locality")}>
           <input value={form.locality} onChange={(e) => set({ locality: e.target.value })} className="input w-full" />
         </Field>
-        <Field label="Address / landmark (optional)">
+        <Field label={t("wizard.address")}>
           <input value={form.addressText} onChange={(e) => set({ addressText: e.target.value })} className="input w-full" />
         </Field>
       </div>
@@ -485,50 +483,39 @@ function StepLocation({ form, set, errors }: StepProps) {
 }
 
 function StepProfile({ form, set, errors }: StepProps) {
+  const t = useT();
   return (
     <div>
-      <Heading title="Tell us about the property" sub="Price, size and a few key attributes buyers look for." />
+      <Heading title={t("wizard.profile.title")} sub={t("wizard.profile.sub")} />
       <div className="flex max-w-xl flex-col gap-4">
-        <Field label="Listing language">
-          <ChipRow>
-            {LANGUAGE_OPTIONS.map((o) => (
-              <Chip key={o.value} selected={form.contentLanguage === o.value} onClick={() => set({ contentLanguage: o.value })}>
-                {o.label}
-              </Chip>
-            ))}
-          </ChipRow>
-          <p className="mt-1 text-xs text-[var(--muted)]">
-            Write the title &amp; description in this language — we don’t translate; your words stay exactly as you type them.
-          </p>
-        </Field>
-        <Field label="Listing title" error={errors.title}>
+        <Field label={t("wizard.listingTitle")} error={errors.title}>
           <input lang={LANG_CODE[form.contentLanguage]} value={form.title} onChange={(e) => set({ title: e.target.value })} className="input w-full" placeholder="e.g. East-facing residential plot near main road" />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Expected price ₹" error={errors.priceMin}>
+          <Field label={t("wizard.expectedPrice")} error={errors.priceMin}>
             <input value={form.priceMin} onChange={(e) => set({ priceMin: e.target.value })} className="input w-full" inputMode="numeric" placeholder="4500000" />
           </Field>
-          <Field label="Up to ₹ (optional)" error={errors.priceMax}>
+          <Field label={t("wizard.upToPrice")} error={errors.priceMax}>
             <input value={form.priceMax} onChange={(e) => set({ priceMax: e.target.value })} className="input w-full" inputMode="numeric" />
           </Field>
         </div>
         <div className="flex flex-wrap items-center gap-4">
-          <Field label="Price basis">
+          <Field label={t("wizard.priceBasis")}>
             <select value={form.priceBasis} onChange={(e) => set({ priceBasis: e.target.value as Form["priceBasis"] })} className="input">
-              <option value="TOTAL">Total</option>
-              <option value="PER_UNIT">Per unit</option>
+              <option value="TOTAL">{t("wizard.total")}</option>
+              <option value="PER_UNIT">{t("wizard.perUnit")}</option>
             </select>
           </Field>
           <label className="mt-5 flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.negotiable} onChange={(e) => set({ negotiable: e.target.checked })} className="h-4 w-4" />
-            Negotiable
+            {t("wizard.negotiable")}
           </label>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Area" error={errors.areaValue}>
+          <Field label={t("wizard.areaLabel")} error={errors.areaValue}>
             <input value={form.areaValue} onChange={(e) => set({ areaValue: e.target.value })} className="input w-full" inputMode="decimal" placeholder="2400" />
           </Field>
-          <Field label="Unit" error={errors.areaUnit}>
+          <Field label={t("wizard.unit")} error={errors.areaUnit}>
             <select value={form.areaUnit} onChange={(e) => set({ areaUnit: e.target.value })} className="input w-full">
               {AREA_UNIT_OPTIONS.map((u) => (
                 <option key={u.value} value={u.value}>{u.label}</option>
@@ -536,7 +523,7 @@ function StepProfile({ form, set, errors }: StepProps) {
             </select>
           </Field>
         </div>
-        <Field label="Facing">
+        <Field label={t("wizard.facing")}>
           <ChipRow>
             {FACING_OPTIONS.map((o) => (
               <Chip key={o.value} selected={form.facing === o.value} onClick={() => set({ facing: o.value })}>
@@ -545,27 +532,27 @@ function StepProfile({ form, set, errors }: StepProps) {
             ))}
           </ChipRow>
         </Field>
-        <Field label="Road access">
+        <Field label={t("wizard.roadAccess")}>
           <ChipRow>
             {(["YES", "NO", "UNKNOWN"] as const).map((v) => (
               <Chip key={v} selected={form.roadAccess === v} onClick={() => set({ roadAccess: v })}>
-                {v === "YES" ? "Has road access" : v === "NO" ? "No road access" : "Not sure"}
+                {v === "YES" ? t("wizard.hasRoad") : v === "NO" ? t("wizard.noRoad") : t("wizard.notSure")}
               </Chip>
             ))}
           </ChipRow>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Road width (optional)">
+          <Field label={t("wizard.roadWidth")}>
             <input value={form.roadWidth} onChange={(e) => set({ roadWidth: e.target.value })} className="input w-full" placeholder="e.g. 30 ft" />
           </Field>
-          <Field label="Possession (optional)">
+          <Field label={t("wizard.possession")}>
             <input value={form.possessionStatus} onChange={(e) => set({ possessionStatus: e.target.value })} className="input w-full" placeholder="e.g. Immediate" />
           </Field>
         </div>
-        <Field label="Nearby landmarks (optional)">
+        <Field label={t("wizard.nearbyLandmarks")}>
           <input value={form.nearbyLandmarks} onChange={(e) => set({ nearbyLandmarks: e.target.value })} className="input w-full" />
         </Field>
-        <Field label="Description (optional)">
+        <Field label={t("wizard.descriptionOptional")}>
           <textarea lang={LANG_CODE[form.contentLanguage]} value={form.description} onChange={(e) => set({ description: e.target.value })} rows={3} className="input w-full" />
         </Field>
       </div>
@@ -574,9 +561,10 @@ function StepProfile({ form, set, errors }: StepProps) {
 }
 
 function StepMedia({ form, set }: StepProps) {
+  const t = useT();
   return (
     <div>
-      <Heading title="Add photos & video" sub="Listings with media get far more enquiries. You can also skip and add them later." />
+      <Heading title={t("wizard.media.title")} sub={t("wizard.media.sub")} />
       <div className="flex max-w-xl flex-col gap-3">
         <MediaUploader value={form.media} onChange={(media) => set({ media })} />
         <p className="text-xs text-[var(--muted)]">
@@ -588,26 +576,27 @@ function StepMedia({ form, set }: StepProps) {
 }
 
 function StepContact({ form, set, errors }: StepProps) {
+  const t = useT();
   return (
     <div>
-      <Heading title="How should buyers reach you?" sub="Your contact details stay private — they're never shown on the public listing." />
+      <Heading title={t("wizard.contact.title")} sub={t("wizard.contact.sub")} />
       <div className="flex max-w-xl flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Your name (optional)">
+          <Field label={t("wizard.yourName")}>
             <input value={form.ownerName} onChange={(e) => set({ ownerName: e.target.value })} className="input w-full" />
           </Field>
-          <Field label="Phone" error={errors.ownerPhone}>
+          <Field label={t("wizard.phone")} error={errors.ownerPhone}>
             <input value={form.ownerPhone} onChange={(e) => set({ ownerPhone: e.target.value })} className="input w-full" placeholder="+91…" />
           </Field>
         </div>
-        <Field label="Email (optional)">
+        <Field label={t("wizard.email")}>
           <input value={form.ownerEmail} onChange={(e) => set({ ownerEmail: e.target.value })} type="email" className="input w-full" />
         </Field>
-        <Field label="You are the">
+        <Field label={t("wizard.youAreThe")}>
           <ChipRow>
             {(["OWNER", "AUTHORISED_REP", "BROKER"] as const).map((r) => (
               <Chip key={r} selected={form.submitterRole === r} onClick={() => set({ submitterRole: r })}>
-                {r === "OWNER" ? "Owner" : r === "AUTHORISED_REP" ? "Authorised rep" : "Broker"}
+                {r === "OWNER" ? t("wizard.owner") : r === "AUTHORISED_REP" ? t("wizard.authRep") : t("wizard.broker")}
               </Chip>
             ))}
           </ChipRow>
@@ -615,12 +604,12 @@ function StepContact({ form, set, errors }: StepProps) {
 
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" checked={form.authority} onChange={(e) => set({ authority: e.target.checked })} className="mt-1 h-4 w-4" />
-          <span>I confirm the information is accurate and I am authorised to list this property.</span>
+          <span>{t("wizard.authorityCheck")}</span>
         </label>
         {errors.authority && <p className="-mt-2 text-xs text-red-500">{errors.authority}</p>}
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" checked={form.consent} onChange={(e) => set({ consent: e.target.checked })} className="mt-1 h-4 w-4" />
-          <span>I consent to be contacted and acknowledge the privacy notice (v{CONSENT_NOTICE_VERSION}).</span>
+          <span>{t("wizard.consentCheck").replace("{v}", CONSENT_NOTICE_VERSION)}</span>
         </label>
         {errors.consent && <p className="-mt-2 text-xs text-red-500">{errors.consent}</p>}
       </div>

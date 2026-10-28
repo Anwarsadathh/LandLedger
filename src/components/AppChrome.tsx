@@ -18,7 +18,7 @@ export function AppChrome({ user, children }: { user: NavUser; children: React.R
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]/85 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="flex items-center" aria-label="OROVA home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/orova-logo.svg" alt="OROVA" className="h-8 w-auto sm:h-10" />
