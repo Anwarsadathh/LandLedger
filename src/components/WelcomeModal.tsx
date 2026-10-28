@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const DISMISS_KEY = "orova_welcomed";
-const HIDE_ON = ["/signin", "/signup", "/mobile-signin", "/complete-profile"];
 
 export function WelcomeModal({ loggedIn }: { loggedIn: boolean }) {
   const pathname = usePathname();
@@ -15,7 +14,8 @@ export function WelcomeModal({ loggedIn }: { loggedIn: boolean }) {
 
   useEffect(() => {
     if (loggedIn) return;
-    if (HIDE_ON.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return;
+    // Onboarding modal only on the landing page — never over a listing, the map, etc.
+    if (pathname !== "/") return;
     try {
       if (localStorage.getItem(DISMISS_KEY) === "1") return;
     } catch {
