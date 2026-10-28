@@ -131,7 +131,7 @@ export function MapExplorer({ items }: { items: PublicListing[] }) {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_1fr]">
       <div
         ref={mapEl}
-        className="h-[52vh] w-full overflow-hidden rounded-2xl border border-[var(--border)] lg:sticky lg:top-24 lg:h-[72vh]"
+        className="isolate h-[52vh] w-full overflow-hidden rounded-2xl border border-[var(--border)] lg:sticky lg:top-24 lg:h-[72vh]"
         style={{ background: "var(--accent-soft)" }}
       />
 

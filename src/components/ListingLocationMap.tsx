@@ -111,7 +111,7 @@ export function ListingLocationMap({
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--border)]">
+      <div className="relative isolate overflow-hidden rounded-2xl border border-[var(--border)]">
         <div ref={mapEl} className="h-72 w-full bg-[var(--background)]" />
         {/* base-layer toggle (above Leaflet panes) */}
         <div className="absolute left-3 top-3 z-[1000] flex overflow-hidden rounded-full border border-[var(--border)] shadow-sm">
