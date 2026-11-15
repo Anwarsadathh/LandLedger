@@ -127,7 +127,7 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
           {/* map */}
           <section>
             <h2 className="mb-3 text-lg font-bold tracking-tight">{t("listing.location")}</h2>
-            <ListingLocationMap latitude={loc.latitude} longitude={loc.longitude} pinPrecision={loc.pinPrecision} />
+            <ListingLocationMap latitude={loc.latitude} longitude={loc.longitude} pinPrecision={loc.pinPrecision} boundary={loc.boundary} />
           </section>
 
           {/* honesty note */}

@@ -33,6 +33,14 @@ const locationSchema = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   pinPrecision: z.enum(PIN_PRECISIONS).default("USER_DROPPED_PIN"),
+  // Optional owner-drawn plot outline (GeoJSON Polygon; [[[lng, lat], …]] rings).
+  boundary: z
+    .object({
+      type: z.literal("Polygon"),
+      coordinates: z.array(z.array(z.tuple([z.number(), z.number()]))).min(1),
+    })
+    .nullable()
+    .optional(),
 });
 
 export const createListingSchema = z.object({

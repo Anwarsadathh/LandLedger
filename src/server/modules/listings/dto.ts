@@ -38,6 +38,10 @@ export function toPublicListing(doc: HydratedDocument<ListingDoc>) {
       latitude: doc.location.latitude,
       longitude: doc.location.longitude,
       pinPrecision: doc.location.pinPrecision,
+      boundary:
+        doc.location.boundary && doc.location.boundary.coordinates
+          ? { type: "Polygon" as const, coordinates: doc.location.boundary.coordinates as number[][][] }
+          : null,
     },
     // Emit a PLAIN object (not the Mongoose subdocument) so a PublicListing can
     // cross the Server->Client boundary (e.g. into <MapExplorer/>). A subdocument

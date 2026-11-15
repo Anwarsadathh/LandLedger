@@ -6,9 +6,19 @@ import "leaflet/dist/leaflet.css";
 type Leaflet = typeof import("leaflet");
 type LMap = import("leaflet").Map;
 type LMarker = import("leaflet").Marker;
+type LPolygon = import("leaflet").Polygon;
+
+export type Boundary = { type: "Polygon"; coordinates: number[][][] };
 
 const DEFAULT_CENTER: [number, number] = [20.5937, 78.9629]; // India
 const DEFAULT_ZOOM = 5;
+
+// Map vertices ([lat, lng]) to a closed GeoJSON Polygon ring ([lng, lat]).
+function toPolygon(pts: [number, number][]): Boundary {
+  const ring = pts.map(([lat, lng]) => [lng, lat]);
+  if (ring.length) ring.push(ring[0]); // close the ring
+  return { type: "Polygon", coordinates: [ring] };
+}
 
 // Pull coordinates straight out of a full Google Maps URL (or a pasted
 // "lat, lng"). Shortened share links are resolved server-side instead.
@@ -48,11 +58,13 @@ export function LocationPicker({
   longitude,
   onChange,
   onAddress,
+  onBoundary,
 }: {
   latitude: string;
   longitude: string;
   onChange: (lat: string, lng: string) => void;
   onAddress?: (addr: { state?: string | null; city?: string | null; locality?: string | null }) => void;
+  onBoundary?: (boundary: Boundary | null) => void;
 }) {
   const [status, setStatus] = useState<"idle" | "busy" | "error">("idle");
   const [msg, setMsg] = useState<string | null>(null);
@@ -60,14 +72,19 @@ export function LocationPicker({
   const [manual, setManual] = useState(false);
   const [resolvingAddr, setResolvingAddr] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
+  const [drawing, setDrawing] = useState(false);
+  const [boundaryPts, setBoundaryPts] = useState<[number, number][]>([]);
 
   const mapEl = useRef<HTMLDivElement>(null);
   const LRef = useRef<Leaflet | null>(null);
   const mapRef = useRef<LMap | null>(null);
   const markerRef = useRef<LMarker | null>(null);
+  const polyRef = useRef<LPolygon | null>(null);
   const onChangeRef = useRef(onChange);
   const onAddressRef = useRef(onAddress);
+  const onBoundaryRef = useRef(onBoundary);
   const commitRef = useRef<(lat: number, lng: number, recenter?: boolean) => void>(() => {});
+  const clickRef = useRef<(lat: number, lng: number) => void>(() => {});
 
   const hasCoords = latitude !== "" && longitude !== "";
 
@@ -75,7 +92,53 @@ export function LocationPicker({
   useEffect(() => {
     onChangeRef.current = onChange;
     onAddressRef.current = onAddress;
+    onBoundaryRef.current = onBoundary;
   });
+
+  // Dispatch map clicks: in drawing mode add a boundary vertex, otherwise move the pin.
+  useEffect(() => {
+    clickRef.current = (lat, lng) => {
+      if (drawing) {
+        const np: [number, number][] = [...boundaryPts, [lat, lng]];
+        setBoundaryPts(np);
+        onBoundaryRef.current?.(np.length >= 3 ? toPolygon(np) : null);
+      } else {
+        commitRef.current(lat, lng);
+      }
+    };
+  }, [drawing, boundaryPts]);
+
+  // (Re)draw the boundary layer — imperative Leaflet only, no setState.
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = LRef.current;
+    if (!map || !L) return;
+    if (polyRef.current) {
+      map.removeLayer(polyRef.current);
+      polyRef.current = null;
+    }
+    if (boundaryPts.length >= 2) {
+      polyRef.current = L.polygon(boundaryPts, {
+        color: "#e0813f",
+        weight: 2,
+        dashArray: drawing ? "5 5" : undefined,
+        fillColor: "#e0813f",
+        fillOpacity: 0.1,
+      }).addTo(map);
+    }
+  }, [boundaryPts, drawing]);
+
+  function undoPoint() {
+    const np = boundaryPts.slice(0, -1);
+    setBoundaryPts(np);
+    onBoundaryRef.current?.(np.length >= 3 ? toPolygon(np) : null);
+  }
+
+  function clearBoundary() {
+    setBoundaryPts([]);
+    setDrawing(false);
+    onBoundaryRef.current?.(null);
+  }
 
   const resolveAddress = useCallback(async (lat: number, lng: number) => {
     setResolvingAddr(true);
@@ -133,7 +196,7 @@ export function LocationPicker({
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(map);
-      map.on("click", (e) => commitRef.current(e.latlng.lat, e.latlng.lng));
+      map.on("click", (e) => clickRef.current(e.latlng.lat, e.latlng.lng));
       mapRef.current = map;
 
       if (hasCoords) {
@@ -264,6 +327,45 @@ export function LocationPicker({
         className="h-64 w-full overflow-hidden rounded-xl border border-[var(--border)]"
         style={{ background: "var(--accent-soft)" }}
       />
+
+      {hasCoords && (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          {boundaryPts.length === 0 && !drawing && (
+            <button type="button" onClick={() => setDrawing(true)} className="btn-ghost text-xs">
+              ✏️ Draw plot outline (optional)
+            </button>
+          )}
+          {drawing && (
+            <>
+              <span className="text-[var(--muted)]">
+                Tap the map to add corners · {boundaryPts.length} point{boundaryPts.length === 1 ? "" : "s"}
+              </span>
+              <button type="button" onClick={() => setDrawing(false)} disabled={boundaryPts.length < 3} className="btn-ghost text-xs disabled:opacity-40">
+                Done
+              </button>
+              {boundaryPts.length > 0 && (
+                <button type="button" onClick={undoPoint} className="btn-ghost text-xs">
+                  Undo
+                </button>
+              )}
+              <button type="button" onClick={clearBoundary} className="btn-ghost text-xs text-red-600">
+                Clear
+              </button>
+            </>
+          )}
+          {!drawing && boundaryPts.length >= 3 && (
+            <>
+              <span className="font-medium text-[var(--accent)]">✓ Plot outline added ({boundaryPts.length} corners)</span>
+              <button type="button" onClick={() => setDrawing(true)} className="btn-ghost text-xs">
+                Edit
+              </button>
+              <button type="button" onClick={clearBoundary} className="btn-ghost text-xs text-red-600">
+                Remove
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {status === "busy" && <p className="text-xs text-[var(--muted)]">Finding location…</p>}
       {resolvingAddr && <p className="text-xs text-[var(--muted)]">Reading the address from the pin…</p>}

@@ -34,6 +34,12 @@ const LocationSchema = new Schema(
     longitude: { type: Number, required: true, min: -180, max: 180 },
     pinPrecision: { type: String, enum: PIN_PRECISIONS, default: "USER_DROPPED_PIN" },
     geo: { type: PointSchema, required: true },
+    // Optional owner-drawn plot outline (GeoJSON Polygon). Coordinates are
+    // [[[lng, lat], …]] rings; stored as Mixed to avoid nested-array casting.
+    boundary: {
+      type: { type: String, enum: ["Polygon"] },
+      coordinates: { type: Schema.Types.Mixed },
+    },
   },
   { _id: false },
 );

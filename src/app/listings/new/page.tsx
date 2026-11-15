@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CONSENT_NOTICE_VERSION } from "@/lib/consent";
 import { Combobox } from "@/components/Combobox";
-import { LocationPicker } from "@/components/LocationPicker";
+import { LocationPicker, type Boundary } from "@/components/LocationPicker";
 import { STATE_NAMES, citiesForState } from "@/lib/states-data";
 import { MediaUploader, type MediaItem } from "@/components/MediaUploader";
 import {
@@ -33,6 +33,7 @@ type Form = {
   addressText: string;
   latitude: string;
   longitude: string;
+  boundary: Boundary | null;
   // profile
   title: string;
   description: string;
@@ -71,6 +72,7 @@ const INITIAL: Form = {
   addressText: "",
   latitude: "",
   longitude: "",
+  boundary: null,
   title: "",
   description: "",
   contentLanguage: "EN",
@@ -234,6 +236,7 @@ export default function NewListingWizard() {
         latitude: Number(form.latitude),
         longitude: Number(form.longitude),
         pinPrecision: "USER_DROPPED_PIN",
+        boundary: form.boundary ?? undefined,
       },
       features: {
         roadAccess: form.roadAccess,
@@ -442,6 +445,7 @@ function StepLocation({ form, set, errors }: StepProps) {
             latitude={form.latitude}
             longitude={form.longitude}
             onChange={(lat, lng) => set({ latitude: lat, longitude: lng })}
+            onBoundary={(b) => set({ boundary: b })}
             onAddress={(a) =>
               set({
                 ...(a.state ? { state: a.state } : {}),

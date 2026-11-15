@@ -60,6 +60,16 @@ export function PriceInsights({ data }: { data: Insights }) {
             </p>
           )}
 
+          {data.trend && data.trend.length >= 2 && (
+            <div className="mt-4 border-t border-[var(--border)] pt-3">
+              <p className="mb-1 flex items-center justify-between text-xs">
+                <span className="font-medium text-[var(--foreground)]">Median ₹/sq ft trend</span>
+                <span className="text-[var(--muted)]">latest {rupee(data.trend[data.trend.length - 1].median)}</span>
+              </p>
+              <TrendChart points={data.trend} />
+            </div>
+          )}
+
           <p className="mt-3 text-[11px] leading-relaxed text-[var(--muted)]">
             Indicative only — computed from OROVA listings{data.scope === "state" ? " across the state" : ""}, not a
             valuation. Prices vary by exact location, approvals and documents. Always verify independently.
@@ -67,6 +77,44 @@ export function PriceInsights({ data }: { data: Insights }) {
         </div>
       )}
     </section>
+  );
+}
+
+function TrendChart({ points }: { points: { label: string; median: number }[] }) {
+  const W = 300;
+  const H = 72;
+  const PAD_X = 6;
+  const PAD_TOP = 8;
+  const PAD_BOT = 18;
+  const vals = points.map((p) => p.median);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const span = max - min || 1;
+  const n = points.length;
+  const x = (i: number) => PAD_X + (i / Math.max(n - 1, 1)) * (W - 2 * PAD_X);
+  const y = (v: number) => PAD_TOP + (1 - (v - min) / span) * (H - PAD_TOP - PAD_BOT);
+  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.median).toFixed(1)}`).join(" ");
+  const area = `${line} L${x(n - 1).toFixed(1)},${(H - PAD_BOT).toFixed(1)} L${x(0).toFixed(1)},${(H - PAD_BOT).toFixed(1)} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Median price per square foot trend">
+      <defs>
+        <linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#e0813f" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#e0813f" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#trend-fill)" />
+      <path d={line} fill="none" stroke="#e0813f" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      {points.map((p, i) => (
+        <g key={i}>
+          <circle cx={x(i)} cy={y(p.median)} r="2.5" fill="#e0813f" />
+          <text x={x(i)} y={H - 5} textAnchor="middle" fontSize="8" fill="var(--muted)">
+            {p.label}
+          </text>
+        </g>
+      ))}
+    </svg>
   );
 }
 

@@ -10,6 +10,10 @@ import type { PublicListing } from "@/server/modules/listings/dto";
 // always hold the type fixed and widen the geography (district -> state) to
 // reach a usable sample.
 const MIN_SAMPLE = 3;
+const MIN_TREND_MONTHS = 3; // need at least this many dated months for an honest trend
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export type TrendPoint = { label: string; median: number };
 
 export type PriceInsights = {
   area: string; // display name of the geography the stats cover
@@ -21,13 +25,20 @@ export type PriceInsights = {
   p75: number | null;
   thisPerSqFt: number | null;
   position: "below" | "around" | "above" | null;
+  trend: TrendPoint[] | null; // monthly median ₹/sq ft, when enough dated history
 };
 
-type PriceRow = { price?: { min?: number }; area?: { normalizedSqFt?: number | null } };
+type Sample = { v: number; at: Date | null };
+type PriceRow = {
+  price?: { min?: number };
+  area?: { normalizedSqFt?: number | null };
+  publishedAt?: Date;
+  createdAt?: Date;
+};
 
-// ₹/sq ft for every published, TOTAL-priced listing with a known sq-ft area
-// that matches `match` (excluding the current listing).
-async function samplePerSqFt(match: Record<string, unknown>, excludeId: string): Promise<number[]> {
+// ₹/sq ft + a date for every published, TOTAL-priced listing with a known sq-ft
+// area that matches `match` (excluding the current listing).
+async function sample(match: Record<string, unknown>, excludeId: string): Promise<Sample[]> {
   const query: Record<string, unknown> = {
     ...match,
     workflowStatus: "PUBLISHED",
@@ -36,10 +47,19 @@ async function samplePerSqFt(match: Record<string, unknown>, excludeId: string):
   };
   if (Types.ObjectId.isValid(excludeId)) query._id = { $ne: new Types.ObjectId(excludeId) };
 
-  const docs = (await Listing.find(query, { "price.min": 1, "area.normalizedSqFt": 1 }).lean()) as unknown as PriceRow[];
+  const docs = (await Listing.find(query, {
+    "price.min": 1,
+    "area.normalizedSqFt": 1,
+    publishedAt: 1,
+    createdAt: 1,
+  }).lean()) as unknown as PriceRow[];
+
   return docs
-    .map((d) => (d.price?.min ?? 0) / (d.area?.normalizedSqFt ?? 0))
-    .filter((n) => Number.isFinite(n) && n > 0);
+    .map((d) => ({
+      v: (d.price?.min ?? 0) / (d.area?.normalizedSqFt ?? 0),
+      at: d.publishedAt ?? d.createdAt ?? null,
+    }))
+    .filter((s) => Number.isFinite(s.v) && s.v > 0);
 }
 
 function percentile(sorted: number[], p: number): number {
@@ -50,6 +70,26 @@ function percentile(sorted: number[], p: number): number {
   const hi = Math.ceil(idx);
   if (lo === hi) return sorted[lo];
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+// Monthly median ₹/sq ft over the last few months. Null unless there is enough
+// dated history to be honest (>= MIN_TREND_MONTHS distinct months).
+function buildTrend(samples: Sample[]): TrendPoint[] | null {
+  const byMonth = new Map<string, number[]>();
+  for (const s of samples) {
+    if (!s.at) continue;
+    const d = new Date(s.at);
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+    const bucket = byMonth.get(key);
+    if (bucket) bucket.push(s.v);
+    else byMonth.set(key, [s.v]);
+  }
+  const months = [...byMonth.keys()].sort();
+  if (months.length < MIN_TREND_MONTHS) return null;
+  return months.slice(-8).map((m) => {
+    const arr = (byMonth.get(m) ?? []).slice().sort((a, b) => a - b);
+    return { label: MONTH_LABELS[Number(m.slice(5, 7)) - 1], median: Math.round(percentile(arr, 0.5)) };
+  });
 }
 
 export async function getPriceInsightsForListing(listing: PublicListing): Promise<PriceInsights> {
@@ -67,31 +107,34 @@ export async function getPriceInsightsForListing(listing: PublicListing): Promis
   // District first; widen to state if the district sample is too thin.
   let scope: PriceInsights["scope"] = "district";
   let area = district;
-  let vals = await samplePerSqFt({ "location.district": district, listingType: type }, listing.id);
-  if (vals.length < MIN_SAMPLE) {
-    const wider = await samplePerSqFt({ "location.state": state, listingType: type }, listing.id);
-    if (wider.length > vals.length) {
-      vals = wider;
+  let samples = await sample({ "location.district": district, listingType: type }, listing.id);
+  if (samples.length < MIN_SAMPLE) {
+    const wider = await sample({ "location.state": state, listingType: type }, listing.id);
+    if (wider.length > samples.length) {
+      samples = wider;
       scope = "state";
       area = stateLabel(state);
     }
   }
 
+  const trend = buildTrend(samples);
+
   const base: PriceInsights = {
     area,
     scope,
     listingType: type,
-    count: vals.length,
+    count: samples.length,
     medianPerSqFt: null,
     p25: null,
     p75: null,
     thisPerSqFt,
     position: null,
+    trend,
   };
 
-  if (vals.length < MIN_SAMPLE) return base;
+  if (samples.length < MIN_SAMPLE) return base;
 
-  const sorted = [...vals].sort((a, b) => a - b);
+  const sorted = samples.map((s) => s.v).sort((a, b) => a - b);
   const median = Math.round(percentile(sorted, 0.5));
   const p25 = Math.round(percentile(sorted, 0.25));
   const p75 = Math.round(percentile(sorted, 0.75));

@@ -7,6 +7,9 @@ import { useT } from "@/components/i18n/LanguageProvider";
 type Leaflet = typeof import("leaflet");
 type LMap = import("leaflet").Map;
 type LTileLayer = import("leaflet").TileLayer;
+type LPolygon = import("leaflet").Polygon;
+
+export type Boundary = { type: "Polygon"; coordinates: number[][][] };
 
 // Esri World Imagery — free satellite tiles (attribution required, no key).
 const ESRI_IMAGERY =
@@ -32,16 +35,19 @@ export function ListingLocationMap({
   latitude,
   longitude,
   pinPrecision,
+  boundary = null,
 }: {
   latitude: number;
   longitude: number;
   pinPrecision: string;
+  boundary?: Boundary | null;
 }) {
   const mapEl = useRef<HTMLDivElement>(null);
   const LRef = useRef<Leaflet | null>(null);
   const mapRef = useRef<LMap | null>(null);
   const satRef = useRef<LTileLayer | null>(null);
   const stdRef = useRef<LTileLayer | null>(null);
+  const boundaryRef = useRef<LPolygon | null>(null);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState<"satellite" | "standard">("satellite");
   const t = useT();
@@ -93,6 +99,33 @@ export function ListingLocationMap({
       if (!map.hasLayer(std)) std.addTo(map);
     }
   }, [view, ready]);
+
+  // Draw the owner's plot outline when present (imperative only — no setState).
+  useEffect(() => {
+    const map = mapRef.current;
+    const L = LRef.current;
+    if (!ready || !map || !L) return;
+    if (boundaryRef.current) {
+      map.removeLayer(boundaryRef.current);
+      boundaryRef.current = null;
+    }
+    const ring = boundary?.coordinates?.[0];
+    if (ring && ring.length >= 3) {
+      const latlngs = ring.map(([lng, lat]) => [lat, lng] as [number, number]);
+      const poly = L.polygon(latlngs, {
+        color: "#e0813f",
+        weight: 2,
+        fillColor: "#e0813f",
+        fillOpacity: 0.12,
+      }).addTo(map);
+      boundaryRef.current = poly;
+      try {
+        map.fitBounds(poly.getBounds(), { padding: [24, 24], maxZoom: 18 });
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [boundary, ready]);
 
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
 
