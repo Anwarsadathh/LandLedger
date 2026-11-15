@@ -36,6 +36,15 @@ type UserRow = {
 
 const iso = (d?: Date | null) => (d ? new Date(d).toISOString() : null);
 
+/** Cheap total-user count for the dashboard (moderators only). */
+export async function countUsersForAdmin(current: CurrentUser): Promise<number> {
+  if (!hasRole(current.role, MODERATOR_ROLES)) {
+    throw new ApiError("FORBIDDEN", "Admin / reviewer access required.", 403);
+  }
+  await connectToDatabase();
+  return User.estimatedDocumentCount();
+}
+
 /** All registered users for the admin dashboard (moderators only). No secrets:
  *  passwordHash is `select:false`, and we never project it. */
 export async function listUsersForAdmin(current: CurrentUser): Promise<{
