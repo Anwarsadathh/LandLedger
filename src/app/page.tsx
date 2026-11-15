@@ -16,10 +16,11 @@ export const dynamic = "force-dynamic";
 // Curated land/aerial photos the hero rotates through (independent of listing
 // data so the hero always looks intentional). Each URL was verified to load.
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=78",
-  "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=2000&q=78",
-  "https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=2000&q=78",
-  "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=2000&q=78",
+  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=78", // land / plots
+  "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=2000&q=78", // homes / residential
+  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=2000&q=78", // flats / apartments
+  "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=2000&q=78", // agricultural / farmland
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=78", // commercial
 ];
 
 type SearchParams = Promise<{
