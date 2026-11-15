@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ListingCard } from "@/components/ListingCard";
 import { MarketplaceFilters } from "@/components/MarketplaceFilters";
+import { HomeNearby } from "@/components/HomeNearby";
 import { Reveal } from "@/components/Reveal";
 import type { PublicListing } from "@/server/modules/listings/dto";
 import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
 import { searchPublicListings } from "@/server/modules/listings/service";
 import { getT } from "@/lib/i18n/server";
+import { LOC_COOKIE, parseLoc } from "@/lib/location-cookie";
 
 export const dynamic = "force-dynamic";
 
@@ -91,7 +94,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   }
 
   // ---------- Landing ----------
-  const { items: featured } = await getListings({ limit: 12 });
+  // Location-aware feed: if the visitor set a location, show listings in their
+  // state first, then fill with the latest from everywhere.
+  const locPref = parseLoc((await cookies()).get(LOC_COOKIE)?.value);
+  let featured: PublicListing[] = locPref?.state ? (await getListings({ state: locPref.state, limit: 12 })).items : [];
+  if (featured.length < 6) {
+    const latest = (await getListings({ limit: 12 })).items;
+    const seen = new Set(featured.map((f) => f.id));
+    featured = [...featured, ...latest.filter((l) => !seen.has(l.id))].slice(0, 12);
+  }
   const popular = featured.slice(0, 8);
   const recent = featured.slice(0, 6);
   const more = (featured.length > 6 ? featured.slice(6) : featured).slice(0, 5);
@@ -196,6 +207,11 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ===== LOCATION-AWARE FEED CONTROL ===== */}
+      <section className="-mt-10">
+        <HomeNearby city={locPref?.city} state={locPref?.state} />
       </section>
 
       {featured.length === 0 ? (
