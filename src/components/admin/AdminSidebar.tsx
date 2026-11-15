@@ -18,7 +18,7 @@ export function AdminSidebar() {
 
   return (
     <aside className="md:w-56 md:shrink-0">
-      <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 md:sticky md:top-24 md:flex-col md:overflow-visible">
+      <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] p-2 md:sticky md:top-20 md:flex-col md:overflow-visible">
         <p className="hidden px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)] md:block">
           Admin
         </p>

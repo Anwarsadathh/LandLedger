@@ -10,9 +10,13 @@ const BARE_ROUTES = ["/signin", "/signup"];
 
 export function AppChrome({ user, children }: { user: NavUser; children: React.ReactNode }) {
   const pathname = usePathname();
-  const bare = BARE_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+  // Auth pages and the admin panel render full-bleed, with no public site header,
+  // footer, welcome modal or assistant widget — the admin has its own shell.
+  const bare =
+    BARE_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`)) ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/");
 
-  // Auth pages render full-bleed, with no site header or footer (all screens).
   if (bare) return <>{children}</>;
 
   return (
