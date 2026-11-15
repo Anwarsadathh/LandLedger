@@ -33,6 +33,9 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
 
   const isSignup = mode === "signup";
   const nextQs = next ? `?next=${encodeURIComponent(next)}` : "";
+  // Mobile-number sign-in needs real SMS (Firebase Blaze) that isn't wired up in
+  // production yet, so hide it on deployed builds. Stays available in local dev.
+  const hideMobile = process.env.NODE_ENV === "production";
 
   const oauthError = params.get("error");
   const oauthErrorMsg = oauthError
@@ -156,7 +159,9 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             <>
               {isSignup && (
                 <p className="mt-5 text-center text-sm text-[var(--muted)]">
-                  Sign up in seconds — we verify your mobile with a one-time code. No password to remember.
+                  {hideMobile
+                    ? "Create your account with Google in seconds — no password to remember."
+                    : "Sign up in seconds — we verify your mobile with a one-time code. No password to remember."}
                 </p>
               )}
 
@@ -169,19 +174,23 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
               <div className="mt-4 flex flex-col gap-2.5">
                 {isSignup ? (
                   <>
-                    <button type="button" onClick={() => setMobileMode(true)} className="btn-primary justify-center py-3">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="7" y="3" width="10" height="18" rx="2.5" />
-                        <path d="M11 18h2" />
-                      </svg>
-                      Sign up with mobile number
-                    </button>
+                    {!hideMobile && (
+                      <button type="button" onClick={() => setMobileMode(true)} className="btn-primary justify-center py-3">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="7" y="3" width="10" height="18" rx="2.5" />
+                          <path d="M11 18h2" />
+                        </svg>
+                        Sign up with mobile number
+                      </button>
+                    )}
                     <SocialButton label="Continue with Google" icon={<GoogleIcon />} href={`/api/v1/auth/google${nextQs}`} />
                   </>
                 ) : (
                   <>
                     <SocialButton label="Continue with Google" icon={<GoogleIcon />} href={`/api/v1/auth/google${nextQs}`} />
-                    <SocialButton label="Continue with mobile number" icon={<PhoneIcon />} href={`/mobile-signin${nextQs}`} />
+                    {!hideMobile && (
+                      <SocialButton label="Continue with mobile number" icon={<PhoneIcon />} href={`/mobile-signin${nextQs}`} />
+                    )}
                   </>
                 )}
               </div>

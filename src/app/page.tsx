@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { ListingCard } from "@/components/ListingCard";
 import { MarketplaceFilters } from "@/components/MarketplaceFilters";
 import { HomeNearby } from "@/components/HomeNearby";
+import { HeroBackground } from "@/components/HeroBackground";
 import { Reveal } from "@/components/Reveal";
 import type { PublicListing } from "@/server/modules/listings/dto";
 import { LISTING_TYPE_LABELS, formatArea, formatPrice, stateLabel } from "@/lib/format";
@@ -12,10 +13,14 @@ import { LOC_COOKIE, parseLoc } from "@/lib/location-cookie";
 
 export const dynamic = "force-dynamic";
 
-// Curated, premium architecture shot — independent of listing data so the hero
-// always looks intentional (a luxury home at dusk under a deep black wash).
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=78";
+// Curated land/aerial photos the hero rotates through (independent of listing
+// data so the hero always looks intentional). Each URL was verified to load.
+const HERO_IMAGES = [
+  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=78",
+  "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=2000&q=78",
+  "https://images.unsplash.com/photo-1472653431158-6364773b2a56?auto=format&fit=crop&w=2000&q=78",
+  "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=2000&q=78",
+];
 
 type SearchParams = Promise<{
   state?: string;
@@ -111,10 +116,9 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     <div className="flex flex-col gap-16">
       {/* ===== HERO ===== */}
       <section className="full-bleed relative -mt-8 overflow-hidden">
-        {/* background land image + readability gradients */}
+        {/* rotating land photos + readability gradients */}
         <div aria-hidden className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={HERO_IMAGE} alt="" className="h-full w-full object-cover" />
+          <HeroBackground images={HERO_IMAGES} />
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
         </div>
