@@ -75,7 +75,7 @@ export function AppChrome({ user, children }: { user: NavUser; children: React.R
       </footer>
 
       <WelcomeModal loggedIn={!!user} />
-      <AssistantWidget />
+      <AssistantWidget signedIn={!!user} />
     </>
   );
 }

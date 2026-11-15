@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Keep this shape in sync with AssistantListing in src/server/ai/assistant.ts.
 // Declared locally so the client bundle never imports the server module.
@@ -16,19 +17,39 @@ type AssistantListing = {
   url: string;
 };
 
-type Msg = { role: "user" | "assistant"; content: string; listings?: AssistantListing[] };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  listings?: AssistantListing[];
+  cta?: "signin";
+};
 
-const SUGGESTIONS = [
+const SEARCH_SUGGESTIONS = [
   "Plots in Karnataka under ₹50 lakh",
-  "Help me list my property",
   "How does OROVA work?",
 ];
 
-export function AssistantWidget() {
+// Rough "I want to list / sell my property" detector, so guests get a sign-in
+// prompt (and we skip a pointless API round-trip) before any intake starts.
+function isListIntent(text: string): boolean {
+  const t = text.toLowerCase();
+  if (/\b(list|sell|post|advertise|upload)\s+(my|a|an|our)\b/.test(t)) return true;
+  const verb = /\b(list|sell|post|advertise|put up|upload|rent out|lease out)\b/.test(t);
+  const noun = /\b(propert|land|plot|home|house|flat|apartment|site|farm|acre|listing)\b/.test(t);
+  return verb && noun;
+}
+
+const GUEST_LIST_REPLY =
+  "Listing on OROVA is free. Sign in (or create a free account) and I'll walk you through it right here — just the basics, and you can add photos and the exact map pin later in your dashboard.";
+
+export function AssistantWidget({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+
+  const pathname = usePathname();
+  const signinHref = `/signin?next=${encodeURIComponent(pathname || "/")}`;
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -43,9 +64,36 @@ export function AssistantWidget() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Guest taps "List my property" (or types a listing intent): prompt sign-in
+  // with a real button instead of starting intake.
+  function startList() {
+    if (sending) return;
+    if (!signedIn) {
+      setMessages((m) => [
+        ...m,
+        { role: "user", content: "I want to list my property" },
+        { role: "assistant", content: GUEST_LIST_REPLY, cta: "signin" },
+      ]);
+      return;
+    }
+    void send("I want to list my property");
+  }
+
   async function send(text: string) {
     const clean = text.trim();
     if (!clean || sending) return;
+
+    // Guests can't list — short-circuit to a sign-in prompt (saves a round-trip).
+    if (!signedIn && isListIntent(clean)) {
+      setMessages((m) => [
+        ...m,
+        { role: "user", content: clean },
+        { role: "assistant", content: GUEST_LIST_REPLY, cta: "signin" },
+      ]);
+      setInput("");
+      return;
+    }
+
     const next: Msg[] = [...messages, { role: "user", content: clean }];
     setMessages(next);
     setInput("");
@@ -133,11 +181,19 @@ export function AssistantWidget() {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <div className="rounded-2xl rounded-tl-sm bg-[var(--background)] px-3.5 py-2.5 text-sm text-[var(--foreground)]">
-                  Hi! I can help you find land &amp; property on OROVA, or explain how listing and
-                  enquiries work. What are you looking for?
+                  Hi! I can help you find land &amp; property on OROVA, or list your own plot in a
+                  few quick questions. What would you like to do?
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  {SUGGESTIONS.map((s) => (
+                  <button
+                    type="button"
+                    onClick={startList}
+                    className="flex items-center gap-2 rounded-full bg-[var(--accent)] px-3 py-2 text-left text-xs font-semibold text-white transition hover:opacity-90"
+                  >
+                    <SparkIcon />
+                    List my property{signedIn ? "" : " (free)"}
+                  </button>
+                  {SEARCH_SUGGESTIONS.map((s) => (
                     <button
                       key={s}
                       type="button"
@@ -163,6 +219,16 @@ export function AssistantWidget() {
                   <div className="max-w-[90%] whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-[var(--background)] px-3.5 py-2.5 text-sm text-[var(--foreground)]">
                     {m.content}
                   </div>
+                  {m.cta === "signin" && (
+                    <Link
+                      href={signinHref}
+                      onClick={() => setOpen(false)}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                    >
+                      Sign in to continue
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </Link>
+                  )}
                   {m.listings && m.listings.length > 0 && (
                     <div className="flex flex-col gap-2">
                       {m.listings.map((l) => (

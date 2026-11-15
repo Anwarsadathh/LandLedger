@@ -73,15 +73,23 @@ Always be honest about what you don't know. End with a helpful next step when it
 
 const SYSTEM_INTAKE = `
 
-LISTING INTAKE (this user is signed in and allowed to list — you can help them create a listing):
-- Collect, a couple at a time: property type (land/residential/commercial/agricultural/industrial); sale or lease; a short title (≥4 chars); an optional description; the language they're writing in; price in ₹ (a whole number); area (a number + unit, e.g. sq ft, sq yd, acre, katha, bigha); and location (full state name, district, and the locality/area). Also their contact name and phone, and whether they are the owner, an authorised representative, or a broker.
-- You MUST get two explicit confirmations before creating anything, asked clearly, one at a time: (1) that they are the owner of this property or are authorised to list it; (2) that they consent to being contacted about enquiries (OROVA privacy notice). Only set the confirmation flags true if they clearly say yes to each.
-- Then call draft_listing. It creates a DRAFT only — it is NOT published. Afterwards tell them: OROVA will review it, and they should open their Dashboard to add photos, set the exact map pin, and submit it for review.
-- You cannot upload photos or drop an exact map pin — the location is approximate and the owner refines it in review. NEVER invent details; use only what the owner tells you.`;
+LISTING INTAKE — this user is signed in and allowed to list, so you can start a listing for them right here in the chat. Make it feel EASY:
+- Open warmly ("Great — I'll help you list it, it only takes a minute") and ask for ONE thing at a time in plain language. Never dump a long form or ask for everything at once. Let them answer naturally and keep the momentum going.
+- Gather these basics, roughly in this order, confirming as you go:
+  1. What they're listing — land/plot, home, commercial, agricultural or industrial — and whether it's for SALE or lease.
+  2. Where it is — state, district, and the locality/village or area.
+  3. The price in ₹ (a whole number; ask if it's negotiable).
+  4. The size — a number and a unit (sq ft, sq yd, cent, acre, katha, bigha…).
+  5. A short title (offer to write a clean title for them from what they've told you) and, optionally, a line or two of description.
+  6. Their name and a contact phone number.
+- Reassure them that PHOTOS and the exact map pin are added afterwards in their Dashboard — they only need the basics now. Never ask them to upload photos here.
+- Before creating anything, get TWO clear yes/no confirmations, asked one at a time: (1) they own this property or are authorised to list it; (2) they're OK being contacted about enquiries (OROVA privacy notice). Only set the confirmation flags true if they clearly say yes to each.
+- Then call draft_listing. It creates a DRAFT only — NOT published — that still goes through OROVA's human review. Afterwards tell them it's saved as a draft and to open their Dashboard to add photos, fine-tune the map pin and submit it for review.
+- Use ONLY what the owner tells you — never invent details. The map location is approximate; the owner refines it in review.`;
 
 const SYSTEM_NO_INTAKE = `
 
-If someone wants to list or create a property: you can't do it for them here, but tell them it's free — they sign in and use "List property" in the top navigation (a short step-by-step wizard). Do not attempt to collect listing details.`;
+If someone wants to list / sell / post a property: listing on OROVA is FREE, but they need to sign in first. Encourage them warmly to sign in (or create a free account), and tell them that once they're signed in you can guide them through listing right here in the chat, step by step — or they can use "List property" in the top navigation. Keep it short and encouraging. Do NOT try to collect listing details until they are signed in.`;
 
 const READ_TOOLS: Anthropic.Tool[] = [
   {

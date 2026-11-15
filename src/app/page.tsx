@@ -179,15 +179,11 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
               <Link
                 href={tile.href}
                 className="group relative flex aspect-[5/4] flex-col justify-end overflow-hidden rounded-2xl bg-[#0f172a] p-4 text-white"
-                style={
-                  featured[i]?.media?.[0]?.url
-                    ? {
-                        backgroundImage: `linear-gradient(to top, rgba(15, 23, 42,0.88), rgba(15, 23, 42,0.15)), url(${featured[i].media[0].url})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }
-                    : undefined
-                }
+                style={{
+                  backgroundImage: `linear-gradient(to top, rgba(15, 23, 42,0.88), rgba(15, 23, 42,0.15)), url(${tile.img})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur transition group-hover:bg-[var(--accent)]">
                   {tile.icon}
@@ -442,11 +438,13 @@ const CHIPS = [
   { labelKey: "home.agricultural", type: "AGRICULTURAL", active: false },
 ];
 
+const TILE = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&q=70`;
+
 const QUICK_TILES = [
-  { labelKey: "nav.landPlots", subKey: "home.tile.landSub", href: "/?type=LAND_PLOT", icon: <IconMap /> },
-  { labelKey: "home.tile.homes", subKey: "home.tile.homesSub", href: "/?type=RESIDENTIAL", icon: <IconHome /> },
-  { labelKey: "nav.commercial", subKey: "home.tile.commercialSub", href: "/?type=COMMERCIAL", icon: <IconBuilding /> },
-  { labelKey: "home.tile.farmland", subKey: "home.tile.farmlandSub", href: "/?type=AGRICULTURAL", icon: <IconSprout /> },
+  { labelKey: "nav.landPlots", subKey: "home.tile.landSub", href: "/?type=LAND_PLOT", icon: <IconMap />, img: TILE("1500382017468-9049fed747ef") },
+  { labelKey: "home.tile.homes", subKey: "home.tile.homesSub", href: "/?type=RESIDENTIAL", icon: <IconHome />, img: TILE("1570129477492-45c003edd2be") },
+  { labelKey: "nav.commercial", subKey: "home.tile.commercialSub", href: "/?type=COMMERCIAL", icon: <IconBuilding />, img: TILE("1486406146926-c627a92ad1ab") },
+  { labelKey: "home.tile.farmland", subKey: "home.tile.farmlandSub", href: "/?type=AGRICULTURAL", icon: <IconSprout />, img: TILE("1625246333195-78d9c38ad449") },
 ];
 
 const STEPS = [
