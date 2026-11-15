@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 // Curated, premium architecture shot — independent of listing data so the hero
 // always looks intentional (a luxury home at dusk under a deep black wash).
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2000&q=80";
+  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=78";
 
 type SearchParams = Promise<{
   state?: string;
@@ -110,59 +110,39 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   return (
     <div className="flex flex-col gap-16">
       {/* ===== HERO ===== */}
-      <section className="full-bleed relative -mt-8 overflow-hidden border-b border-[var(--border)] bg-[var(--card)]">
-        {/* soft indigo wash, top-right */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_55%_at_90%_0%,var(--accent-soft),transparent_60%)]" />
+      <section className="full-bleed relative -mt-8 overflow-hidden">
+        {/* background land image + readability gradients */}
+        <div aria-hidden className="absolute inset-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={HERO_IMAGE} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20" />
+        </div>
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-10 sm:py-12 lg:py-16">
-          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_.9fr] lg:gap-12">
-            {/* ---- left: headline ---- */}
-            <div className="animate-fade-up">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-medium text-[var(--muted)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-                {t("home.heroBadge")}
-              </span>
+        <div className="relative mx-auto flex min-h-[70vh] w-full max-w-6xl flex-col justify-center px-4 py-14 text-white sm:min-h-[76vh] sm:py-20">
+          <span className="animate-fade-up inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+            {t("home.heroBadge")}
+          </span>
 
-              <h1 className="mt-4 text-[2rem] font-extrabold leading-[1.08] tracking-tight text-[var(--foreground)] sm:mt-5 sm:text-5xl lg:text-[3.25rem]">
-                {t("home.heroTitle1")}{" "}
-                <span className="bg-gradient-to-r from-[var(--accent)] to-indigo-400 bg-clip-text text-transparent">
-                  {t("home.heroTitle2")}
-                </span>
-                .
-              </h1>
+          <h1 className="animate-fade-up mt-5 max-w-2xl text-[2.25rem] font-extrabold leading-[1.06] tracking-tight drop-shadow-sm sm:text-5xl lg:text-6xl" style={{ animationDelay: "0.06s" }}>
+            {t("home.heroTitle1")}{" "}
+            <span className="text-[#a5b4fc]">{t("home.heroTitle2")}</span>.
+          </h1>
 
-              <p className="mt-3 max-w-md text-base text-[var(--muted)] sm:mt-4 sm:text-lg">
-                {t("home.heroSubtitle")}
-              </p>
+          <p className="animate-fade-up mt-4 max-w-xl text-base text-white/85 sm:text-lg" style={{ animationDelay: "0.12s" }}>
+            {t("home.heroSubtitle")}
+          </p>
 
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--muted)]">
-                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Human-reviewed</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Across India</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Free to list</span>
-              </div>
-            </div>
-
-            {/* ---- right: framed visual (desktop only) ---- */}
-            <div className="animate-fade-up relative hidden lg:block" style={{ animationDelay: "0.12s" }}>
-              <div className="overflow-hidden rounded-3xl border border-[var(--border)] shadow-xl shadow-black/5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={HERO_IMAGE} alt="Land and property across India" className="aspect-[4/3] w-full object-cover" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-lg">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
-                  <IconShield />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold leading-tight">Human-reviewed</p>
-                  <p className="text-xs text-[var(--muted)]">No fake &ldquo;Verified&rdquo; badges</p>
-                </div>
-              </div>
-            </div>
+          {/* prominent search */}
+          <div className="animate-fade-up mt-6 w-full max-w-3xl rounded-2xl shadow-2xl shadow-black/40 sm:mt-7" style={{ animationDelay: "0.18s" }}>
+            <MarketplaceFilters initial={{}} variant="compact" />
           </div>
 
-          {/* ---- search bar: full width below the split ---- */}
-          <div className="animate-fade-up mt-7 sm:mt-9 lg:mt-10" style={{ animationDelay: "0.2s" }}>
-            <MarketplaceFilters initial={{}} variant="compact" />
+          <div className="animate-fade-up mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/85" style={{ animationDelay: "0.24s" }}>
+            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Human-reviewed</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Land &amp; property across India</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Free to list</span>
           </div>
         </div>
       </section>
