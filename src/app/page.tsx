@@ -110,53 +110,59 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   return (
     <div className="flex flex-col gap-16">
       {/* ===== HERO ===== */}
-      <section
-        className="full-bleed relative -mt-8 flex min-h-[90vh] items-center overflow-hidden bg-[#0b1020] text-white"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(8,7,5,0.35) 0%, rgba(8,7,5,0.3) 45%, rgba(8,7,5,0.62) 100%), url(${HERO_IMAGE})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* soft vignette */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,transparent_45%,rgba(0,0,0,0.35)_100%)]" />
-        {/* single soft gold glow — subtle, not muddy */}
-        <div className="animate-float-slow pointer-events-none absolute -top-24 right-[14%] h-96 w-96 rounded-full bg-[var(--accent)]/15 blur-[150px]" />
+      <section className="full-bleed relative -mt-8 overflow-hidden border-b border-[var(--border)] bg-[var(--card)]">
+        {/* soft indigo wash, top-right */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_55%_at_90%_0%,var(--accent-soft),transparent_60%)]" />
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-              {t("home.heroBadge")}
-            </span>
-
-            <h1 className="animate-fade-up mt-6 text-5xl font-extrabold leading-[1.04] tracking-tight sm:text-7xl" style={{ animationDelay: "0.08s" }}>
-              {t("home.heroTitle1")}{" "}
-              <span className="text-shimmer bg-gradient-to-r from-amber-200 via-[#818cf8] to-amber-200 bg-clip-text text-transparent">
-                {t("home.heroTitle2")}
+        <div className="relative mx-auto w-full max-w-6xl px-4 py-10 sm:py-12 lg:py-16">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_.9fr] lg:gap-12">
+            {/* ---- left: headline ---- */}
+            <div className="animate-fade-up">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-medium text-[var(--muted)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                {t("home.heroBadge")}
               </span>
-              .
-            </h1>
 
-            <p className="animate-fade-up mx-auto mt-6 max-w-xl text-lg text-white/75" style={{ animationDelay: "0.16s" }}>
-              {t("home.heroSubtitle")}
-            </p>
+              <h1 className="mt-4 text-[2rem] font-extrabold leading-[1.08] tracking-tight text-[var(--foreground)] sm:mt-5 sm:text-5xl lg:text-[3.25rem]">
+                {t("home.heroTitle1")}{" "}
+                <span className="bg-gradient-to-r from-[var(--accent)] to-indigo-400 bg-clip-text text-transparent">
+                  {t("home.heroTitle2")}
+                </span>
+                .
+              </h1>
 
-            <div className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "0.24s" }}>
-              <Link href="/listings/new" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-semibold text-[var(--foreground)] shadow-lg shadow-black/20 transition hover:-translate-y-0.5">
-                {t("home.listYourProperty")}
-                <Arrow />
-              </Link>
-              <a href="#listings" className="hidden items-center rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:inline-flex">
-                {t("home.browseListings")}
-              </a>
+              <p className="mt-3 max-w-md text-base text-[var(--muted)] sm:mt-4 sm:text-lg">
+                {t("home.heroSubtitle")}
+              </p>
+
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--muted)]">
+                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Human-reviewed</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Across India</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />Free to list</span>
+              </div>
+            </div>
+
+            {/* ---- right: framed visual (desktop only) ---- */}
+            <div className="animate-fade-up relative hidden lg:block" style={{ animationDelay: "0.12s" }}>
+              <div className="overflow-hidden rounded-3xl border border-[var(--border)] shadow-xl shadow-black/5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={HERO_IMAGE} alt="Land and property across India" className="aspect-[4/3] w-full object-cover" />
+              </div>
+              <div className="absolute -bottom-4 -left-4 flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-lg">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <IconShield />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold leading-tight">Human-reviewed</p>
+                  <p className="text-xs text-[var(--muted)]">No fake &ldquo;Verified&rdquo; badges</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="animate-fade-up mx-auto mt-10 max-w-3xl" style={{ animationDelay: "0.4s" }}>
-            <div className="rounded-2xl shadow-2xl shadow-black/40">
-              <MarketplaceFilters initial={{}} variant="compact" />
-            </div>
+          {/* ---- search bar: full width below the split ---- */}
+          <div className="animate-fade-up mt-7 sm:mt-9 lg:mt-10" style={{ animationDelay: "0.2s" }}>
+            <MarketplaceFilters initial={{}} variant="compact" />
           </div>
         </div>
       </section>
