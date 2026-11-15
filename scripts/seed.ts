@@ -15,6 +15,7 @@ import { connectToDatabase } from "@/server/db/connect";
 import { Listing } from "@/server/db/models/listing";
 import { User } from "@/server/db/models/user";
 import { CONSENT_NOTICE_VERSION } from "@/lib/consent";
+import { demoImageFor } from "@/lib/demo-images";
 import { makeSlug } from "@/lib/slug";
 import { hashPassword } from "@/server/auth/password";
 
@@ -68,7 +69,7 @@ function listing(
         geo: { type: "Point", coordinates: [o.lng, o.lat] },
       },
       features: { roadAccess: "YES", facing: "EAST" },
-      media: [{ type: "PHOTO", url: `https://picsum.photos/seed/${o.photoSeed}/800/500` }],
+      media: [{ type: "PHOTO", url: demoImageFor(o.listingType) }],
       ownerContact: { name: o.ownerName, phone: o.ownerPhone },
       submitterRole: "OWNER",
       authorityDeclarationAccepted: true,
