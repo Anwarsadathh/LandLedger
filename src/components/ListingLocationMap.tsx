@@ -24,7 +24,7 @@ function pinIcon(L: Leaflet) {
     html:
       '<div style="transform:translate(-50%,-100%);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))">' +
       '<svg width="30" height="38" viewBox="0 0 30 38" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-      '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 23 15 23s15-12.5 15-23C30 6.7 23.3 0 15 0Z" fill="#e0813f"/>' +
+      '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 23 15 23s15-12.5 15-23C30 6.7 23.3 0 15 0Z" fill="#4f46e5"/>' +
       '<circle cx="15" cy="15" r="6" fill="#fff"/></svg></div>',
     iconSize: [0, 0],
     iconAnchor: [0, 0],
@@ -113,9 +113,9 @@ export function ListingLocationMap({
     if (ring && ring.length >= 3) {
       const latlngs = ring.map(([lng, lat]) => [lat, lng] as [number, number]);
       const poly = L.polygon(latlngs, {
-        color: "#e0813f",
+        color: "#4f46e5",
         weight: 2,
-        fillColor: "#e0813f",
+        fillColor: "#4f46e5",
         fillOpacity: 0.12,
       }).addTo(map);
       boundaryRef.current = poly;

@@ -126,7 +126,7 @@ export function OwnerContactActions({
                   onMouseEnter={() => setHover(n)}
                   className="p-0.5"
                 >
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill={(hover || stars) >= n ? "#e0813f" : "none"} stroke="#e0813f" strokeWidth={1.5} strokeLinejoin="round">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill={(hover || stars) >= n ? "#4f46e5" : "none"} stroke="#4f46e5" strokeWidth={1.5} strokeLinejoin="round">
                     <path d="m12 2 3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z" />
                   </svg>
                 </button>

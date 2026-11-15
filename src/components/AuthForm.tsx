@@ -76,7 +76,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       <div
         className="relative flex min-h-[50vh] shrink-0 flex-col justify-end p-6 pb-14 text-white md:min-h-screen md:justify-center md:p-14"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(27,24,19,0.2) 0%, rgba(27,24,19,0.45) 55%, rgba(27,24,19,0.82) 100%), url(${HERO_IMAGE})`,
+          backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42,0.2) 0%, rgba(15, 23, 42,0.45) 55%, rgba(15, 23, 42,0.82) 100%), url(${HERO_IMAGE})`,
           backgroundSize: "cover",
           backgroundPosition: "center 40%",
         }}

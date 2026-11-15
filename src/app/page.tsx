@@ -100,7 +100,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     <div className="flex flex-col gap-16">
       {/* ===== HERO ===== */}
       <section
-        className="full-bleed relative -mt-8 flex min-h-[90vh] items-center overflow-hidden bg-[#0b0a08] text-white"
+        className="full-bleed relative -mt-8 flex min-h-[90vh] items-center overflow-hidden bg-[#0b1020] text-white"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(8,7,5,0.35) 0%, rgba(8,7,5,0.3) 45%, rgba(8,7,5,0.62) 100%), url(${HERO_IMAGE})`,
           backgroundSize: "cover",
@@ -121,7 +121,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
             <h1 className="animate-fade-up mt-6 text-5xl font-extrabold leading-[1.04] tracking-tight sm:text-7xl" style={{ animationDelay: "0.08s" }}>
               {t("home.heroTitle1")}{" "}
-              <span className="text-shimmer bg-gradient-to-r from-amber-200 via-[#f0a86a] to-amber-200 bg-clip-text text-transparent">
+              <span className="text-shimmer bg-gradient-to-r from-amber-200 via-[#818cf8] to-amber-200 bg-clip-text text-transparent">
                 {t("home.heroTitle2")}
               </span>
               .
@@ -176,11 +176,11 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             <Reveal key={tile.labelKey} delay={i * 70}>
               <Link
                 href={tile.href}
-                className="group relative flex aspect-[5/4] flex-col justify-end overflow-hidden rounded-2xl bg-[#1b1813] p-4 text-white"
+                className="group relative flex aspect-[5/4] flex-col justify-end overflow-hidden rounded-2xl bg-[#0f172a] p-4 text-white"
                 style={
                   featured[i]?.media?.[0]?.url
                     ? {
-                        backgroundImage: `linear-gradient(to top, rgba(27,24,19,0.88), rgba(27,24,19,0.15)), url(${featured[i].media[0].url})`,
+                        backgroundImage: `linear-gradient(to top, rgba(15, 23, 42,0.88), rgba(15, 23, 42,0.15)), url(${featured[i].media[0].url})`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                       }
@@ -278,18 +278,18 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="property-cta full-bleed relative isolate overflow-hidden bg-[#17140f] text-white">
+      <section className="property-cta full-bleed relative isolate overflow-hidden bg-[#1e1b4b] text-white">
         <div aria-hidden="true" className="property-cta__grid pointer-events-none absolute inset-0" />
         <div aria-hidden="true" className="property-cta__glow property-cta__glow--one pointer-events-none absolute rounded-full" />
         <div aria-hidden="true" className="property-cta__glow property-cta__glow--two pointer-events-none absolute rounded-full" />
         <div className="relative mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16 lg:py-20">
           <Reveal className="property-cta__reveal">
-            <div className="property-cta__panel grid items-center gap-7 rounded-[1.75rem] border border-white/10 bg-[#211b15] p-5 pb-8 shadow-2xl shadow-black/20 backdrop-blur-sm sm:gap-9 sm:rounded-[2rem] sm:p-8 sm:pb-10 lg:grid-cols-[1.08fr_.92fr] lg:gap-12 lg:p-12">
+            <div className="property-cta__panel grid items-center gap-7 rounded-[1.75rem] border border-white/10 bg-[#211c4d] p-5 pb-8 shadow-2xl shadow-black/20 backdrop-blur-sm sm:gap-9 sm:rounded-[2rem] sm:p-8 sm:pb-10 lg:grid-cols-[1.08fr_.92fr] lg:gap-12 lg:p-12">
               <div className="property-cta__copy">
                 <span className="property-cta__eyebrow inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 sm:text-xs">
                   <span className="relative flex h-2 w-2">
-                    <span className="property-cta__pulse absolute inline-flex h-full w-full rounded-full bg-[#f0a86a] opacity-50" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#f0a86a]" />
+                    <span className="property-cta__pulse absolute inline-flex h-full w-full rounded-full bg-[#818cf8] opacity-50" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#818cf8]" />
                   </span>
                   For owners &amp; brokers · Always free
                 </span>
@@ -301,7 +301,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                 </p>
 
                 <div className="property-cta__actions mt-6 grid gap-3 sm:mt-8 sm:flex sm:flex-wrap">
-                  <Link href="/listings/new" className="property-cta__primary group inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[#f0a86a] px-6 py-3.5 text-[15px] font-bold text-[#21170f] shadow-lg shadow-[#e0813f]/20 transition duration-300 hover:-translate-y-0.5 hover:bg-[#ffc28e] hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffc28e] active:translate-y-0 sm:min-h-12 sm:px-6">
+                  <Link href="/listings/new" className="property-cta__primary group inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[#818cf8] px-6 py-3.5 text-[15px] font-bold text-[#1e1b4b] shadow-lg shadow-[#4f46e5]/20 transition duration-300 hover:-translate-y-0.5 hover:bg-[#a5b4fc] hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#a5b4fc] active:translate-y-0 sm:min-h-12 sm:px-6">
                     Start your free listing <Arrow />
                   </Link>
                   <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white/90 transition duration-300 hover:border-white/40 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:bg-white/15">
@@ -310,7 +310,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                 </div>
 
                 <div className="property-cta__trust mt-5 flex items-center justify-center gap-2 text-xs text-white/55 sm:mt-6 sm:justify-start sm:text-sm">
-                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-[#f0a86a]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-[#818cf8]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3.5" y="8.5" width="13" height="9" rx="2" />
                     <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5M10 12v2" />
                   </svg>
@@ -326,35 +326,35 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                         <path d="M 34 0 L 0 0 0 34" fill="none" stroke="rgba(255,255,255,.075)" strokeWidth="1" />
                       </pattern>
                       <linearGradient id="cta-map-wash" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0" stopColor="#554233" />
-                        <stop offset="1" stopColor="#25221e" />
+                        <stop offset="0" stopColor="#3730a3" />
+                        <stop offset="1" stopColor="#1e1b4b" />
                       </linearGradient>
                     </defs>
                     <rect width="440" height="280" fill="url(#cta-map-wash)" />
                     <rect width="440" height="280" fill="url(#cta-map-grid)" />
-                    <path d="M-10 218C66 174 113 240 183 194S293 168 450 207" fill="none" stroke="rgba(240,168,106,.25)" strokeWidth="18" />
-                    <path d="M-10 218C66 174 113 240 183 194S293 168 450 207" fill="none" stroke="rgba(255,232,201,.58)" strokeWidth="2" strokeDasharray="5 8" />
+                    <path d="M-10 218C66 174 113 240 183 194S293 168 450 207" fill="none" stroke="rgba(129, 140, 248,.25)" strokeWidth="18" />
+                    <path d="M-10 218C66 174 113 240 183 194S293 168 450 207" fill="none" stroke="rgba(199, 210, 254,.58)" strokeWidth="2" strokeDasharray="5 8" />
                     <path d="M67 -12C118 57 96 89 156 133S209 217 204 294M307 -20C283 47 330 78 302 132S349 218 331 296" fill="none" stroke="rgba(255,255,255,.12)" strokeWidth="2" />
                     <path d="M38 70h45m-18-13 18 13-18 13M365 94h37m-15-11 15 11-15 11" fill="none" stroke="rgba(255,255,255,.23)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle className="property-cta__ripple" cx="220" cy="132" r="53" fill="rgba(240,168,106,.09)" />
-                    <circle cx="220" cy="132" r="38" fill="rgba(240,168,106,.12)" />
-                    <path className="property-cta__pin" d="M220 107c-12.2 0-22 9.6-22 21.5 0 16.2 22 38.5 22 38.5s22-22.3 22-38.5c0-11.9-9.8-21.5-22-21.5Z" fill="#f0a86a" />
-                    <circle cx="220" cy="129" r="7" fill="#281a10" />
+                    <circle className="property-cta__ripple" cx="220" cy="132" r="53" fill="rgba(129, 140, 248,.09)" />
+                    <circle cx="220" cy="132" r="38" fill="rgba(129, 140, 248,.12)" />
+                    <path className="property-cta__pin" d="M220 107c-12.2 0-22 9.6-22 21.5 0 16.2 22 38.5 22 38.5s22-22.3 22-38.5c0-11.9-9.8-21.5-22-21.5Z" fill="#818cf8" />
+                    <circle cx="220" cy="129" r="7" fill="#1e1b4b" />
                   </svg>
-                  <div className="property-cta__map-label absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#17140f]/70 px-3 py-2 text-[10px] font-semibold tracking-[0.12em] text-white/80 backdrop-blur sm:left-4 sm:top-4 sm:text-[11px]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#f0a86a]" />
+                  <div className="property-cta__map-label absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#1e1b4b]/70 px-3 py-2 text-[10px] font-semibold tracking-[0.12em] text-white/80 backdrop-blur sm:left-4 sm:top-4 sm:text-[11px]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#818cf8]" />
                     YOUR PROPERTY, ON THE MAP
                   </div>
-                  <div className="property-cta__map-foot absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-xl border border-white/10 bg-[#17140f]/70 px-3 py-2.5 backdrop-blur sm:bottom-4 sm:left-4 sm:right-4 sm:px-4 sm:py-3">
+                  <div className="property-cta__map-foot absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-xl border border-white/10 bg-[#1e1b4b]/70 px-3 py-2.5 backdrop-blur sm:bottom-4 sm:left-4 sm:right-4 sm:px-4 sm:py-3">
                     <div>
                       <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/50 sm:text-[11px]">Reach buyers</p>
                       <p className="mt-0.5 text-xs font-semibold text-white sm:text-sm">Across India</p>
                     </div>
-                    <span className="rounded-full bg-[#f0a86a]/15 px-3 py-1.5 text-[10px] font-semibold text-[#ffc28e] sm:text-xs">Free to list</span>
+                    <span className="rounded-full bg-[#818cf8]/15 px-3 py-1.5 text-[10px] font-semibold text-[#a5b4fc] sm:text-xs">Free to list</span>
                   </div>
                 </div>
-                <div className="property-cta__private-card absolute -bottom-3 right-2 flex items-center gap-2.5 rounded-2xl border border-white/15 bg-[#27221c] px-3 py-2.5 shadow-xl shadow-black/30 sm:-bottom-4 sm:right-4 sm:gap-3 sm:px-4 sm:py-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f0a86a]/15 text-[#ffc28e] sm:h-10 sm:w-10">
+                <div className="property-cta__private-card absolute -bottom-3 right-2 flex items-center gap-2.5 rounded-2xl border border-white/15 bg-[#2a2560] px-3 py-2.5 shadow-xl shadow-black/30 sm:-bottom-4 sm:right-4 sm:gap-3 sm:px-4 sm:py-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#818cf8]/15 text-[#a5b4fc] sm:h-10 sm:w-10">
                     <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3.5" y="8.5" width="13" height="9" rx="2" />
                       <path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5M10 12v2" />

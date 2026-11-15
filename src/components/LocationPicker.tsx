@@ -45,7 +45,7 @@ function pinIcon(L: Leaflet) {
   return L.divIcon({
     className: "",
     html: `<svg viewBox="0 0 24 24" width="32" height="32" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))">
-      <path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7Z" fill="#e0813f" stroke="#fff" stroke-width="1.5"/>
+      <path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7Z" fill="#4f46e5" stroke="#fff" stroke-width="1.5"/>
       <circle cx="12" cy="9" r="2.6" fill="#fff"/>
     </svg>`,
     iconSize: [32, 32],
@@ -119,10 +119,10 @@ export function LocationPicker({
     }
     if (boundaryPts.length >= 2) {
       polyRef.current = L.polygon(boundaryPts, {
-        color: "#e0813f",
+        color: "#4f46e5",
         weight: 2,
         dashArray: drawing ? "5 5" : undefined,
-        fillColor: "#e0813f",
+        fillColor: "#4f46e5",
         fillOpacity: 0.1,
       }).addTo(map);
     }

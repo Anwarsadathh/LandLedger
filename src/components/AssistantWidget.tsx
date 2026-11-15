@@ -105,7 +105,7 @@ export function AssistantWidget() {
           className="fixed bottom-0 right-0 z-50 flex h-[85vh] w-full flex-col overflow-hidden bg-[var(--card)] shadow-2xl sm:bottom-5 sm:right-5 sm:h-[34rem] sm:w-[23rem] sm:rounded-3xl sm:border sm:border-[var(--border)]"
         >
           {/* Header */}
-          <div className="flex items-center gap-2.5 bg-[#1b1813] px-4 py-3 text-white">
+          <div className="flex items-center gap-2.5 bg-[#0f172a] px-4 py-3 text-white">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)]">
               <SparkIcon />
             </span>

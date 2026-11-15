@@ -100,15 +100,15 @@ function TrendChart({ points }: { points: { label: string; median: number }[] })
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Median price per square foot trend">
       <defs>
         <linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#e0813f" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#e0813f" stopOpacity="0" />
+          <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#trend-fill)" />
-      <path d={line} fill="none" stroke="#e0813f" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      <path d={line} fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
       {points.map((p, i) => (
         <g key={i}>
-          <circle cx={x(i)} cy={y(p.median)} r="2.5" fill="#e0813f" />
+          <circle cx={x(i)} cy={y(p.median)} r="2.5" fill="#4f46e5" />
           <text x={x(i)} y={H - 5} textAnchor="middle" fontSize="8" fill="var(--muted)">
             {p.label}
           </text>

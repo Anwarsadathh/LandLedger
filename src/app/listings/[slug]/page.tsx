@@ -181,8 +181,8 @@ export default async function ListingDetail({ params }: { params: Promise<{ slug
                       key={n}
                       viewBox="0 0 24 24"
                       className="h-4 w-4"
-                      fill={n <= Math.round(rating.average as number) ? "#e0813f" : "none"}
-                      stroke="#e0813f"
+                      fill={n <= Math.round(rating.average as number) ? "#4f46e5" : "none"}
+                      stroke="#4f46e5"
                       strokeWidth={1.5}
                       strokeLinejoin="round"
                     >

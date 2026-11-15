@@ -28,7 +28,7 @@ function escapeHtml(s: string): string {
 }
 
 function priceIcon(L: Leaflet, label: string, selected: boolean) {
-  const bg = selected ? "#1b1813" : "#e0813f";
+  const bg = selected ? "#0f172a" : "#4f46e5";
   return L.divIcon({
     className: "",
     html: `<div style="background:${bg};color:#fff;font-weight:700;font-size:11px;line-height:16px;padding:3px 9px;border-radius:999px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.4);border:1.5px solid #fff;transform:translate(-50%,-100%)">${escapeHtml(label)}</div>`,
@@ -95,7 +95,7 @@ export function MapExplorer({ items }: { items: PublicListing[] }) {
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
       const m = L.marker([lat, lng], { icon: priceIcon(L, compactPrice(it.price.min), false) });
       m.bindPopup(
-        `<a href="/listings/${it.slug}" style="font-weight:600;color:#1b1813">${escapeHtml(it.title)}</a>` +
+        `<a href="/listings/${it.slug}" style="font-weight:600;color:#0f172a">${escapeHtml(it.title)}</a>` +
           `<br/><span style="color:#8a8075">${compactPrice(it.price.min)} · ${escapeHtml(formatArea(it.area))}</span>`,
       );
       m.on("click", () => {

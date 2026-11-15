@@ -88,7 +88,7 @@ export function WelcomeModal({ loggedIn }: { loggedIn: boolean }) {
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
 
-        <div className="bg-[#1b1813] px-6 pb-8 pt-7 text-center text-white">
+        <div className="bg-[#0f172a] px-6 pb-8 pt-7 text-center text-white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/orova-logo-light.svg" alt="OROVA" className="mx-auto h-9 w-auto" />
           <h2 className="mt-4 text-2xl font-extrabold tracking-tight">Find land &amp; property, honestly.</h2>
